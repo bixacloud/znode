@@ -163,16 +163,5 @@ The setup wizard creates `.env` automatically. Key variables:
 | `FRONTEND_URL` | Your domain URL |
 | `API_URL` | API base URL (same as frontend) |
 
-## Releases
-
-When a version tag is pushed, GitHub Actions automatically creates a release:
-
-```bash
-git tag v1.0.1
-git push origin v1.0.1
-# → Release "ZNode v1.0.1" created with downloadable .tar.gz
-```
-
 ## License
-
-MIT
+GPL V3
