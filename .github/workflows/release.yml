@@ -2,8 +2,11 @@ name: Create Release
 
 on:
   push:
-    tags:
-      - '*.*.*'
+    branches:
+      - main
+    paths-ignore:
+      - '*.md'
+      - '.github/**'
 
 permissions:
   contents: write
@@ -14,12 +17,34 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Get version from tag
+      - name: Get version from package.json
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "${{ steps.version.outputs.VERSION }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create and push tag
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.version.outputs.VERSION }}
+          git push origin ${{ steps.version.outputs.VERSION }}
 
       - name: Package release
+        if: steps.check_tag.outputs.exists == 'false'
         run: |
           tar czf znode-${{ steps.version.outputs.VERSION }}.tar.gz \
             --exclude='node_modules' \
@@ -43,6 +68,7 @@ jobs:
             .
 
       - name: Create GitHub Release
+        if: steps.check_tag.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
           name: ZNode ${{ steps.version.outputs.VERSION }}
