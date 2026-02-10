@@ -1,0 +1,55 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Package release
+        run: |
+          tar czf znode-${{ steps.version.outputs.VERSION }}.tar.gz \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='dist-dm' \
+            --exclude='backend/node_modules' \
+            --exclude='backend/dist' \
+            --exclude='backend/logs/*.json' \
+            --exclude='backend/.env' \
+            --exclude='.env.production' \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='tmp' \
+            --exclude='output' \
+            --exclude='coverage' \
+            --exclude='*.log' \
+            --exclude='bixa-2.0.1' \
+            --exclude='MOFH-API-Docs' \
+            --exclude='mofh-client' \
+            --exclude='api-client.php' \
+            .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ZNode v${{ steps.version.outputs.VERSION }}
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          make_latest: true
+          generate_release_notes: true
+          files: |
+            znode-${{ steps.version.outputs.VERSION }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
