@@ -1,4 +1,5 @@
 name: Create Release
+# Auto create tag and release from package.json version
 
 on:
   push:
