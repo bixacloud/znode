@@ -32,6 +32,7 @@ import premiumPlansRoutes from './routes/premium-plans.js';
 import cdnSearchRoutes from './routes/cdn-search.js';
 import builderRoutes from './routes/builder.js';
 import importRoutes from './routes/import.js';
+import forumRoutes from './routes/forum.js';
 import { initializeBackupScheduler } from './lib/backup/index.js';
 
 const app = express();
@@ -158,6 +159,7 @@ async function startServer() {
   app.use('/api/tools/cdn-search', cdnSearchRoutes);
   app.use('/api/builder', builderRoutes);
   app.use('/api/admin/import', importRoutes);
+  app.use('/api/forum', forumRoutes);
 
   // SEO: Serve robots.txt and sitemap.xml dynamically (proxy to API handlers)
   app.get('/robots.txt', async (req, res) => {

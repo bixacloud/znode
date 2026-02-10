@@ -28,6 +28,11 @@ model User {
   emailVerificationTokens EmailVerificationToken[]
   ticketReplies           TicketReply[]            @relation("SupportReplies")
   tickets                 Ticket[]
+  forumPosts              ForumPost[]
+  forumComments           ForumComment[]
+  forumReactions          ForumReaction[]
+  forumUpvotes            ForumUpvote[]
+  forumSubscriptions      ForumSubscription[]
 
   @@map("users")
 }
@@ -329,6 +334,7 @@ enum NotificationType {
   SSL_ISSUED
   SSL_FAILED
   SSL_EXPIRED
+  FORUM_REPLY
   OTHER
 }
 
@@ -487,4 +493,158 @@ model PremiumPlan {
   @@index([slug])
   @@index([order])
   @@map("premium_plans")
+}
+
+// ==================== FORUM ====================
+
+model ForumChannel {
+  id            String      @id @default(cuid())
+  name          String
+  slug          String      @unique
+  description   String?     @db.Text
+  icon          String?     // Emoji or icon name
+  color         String?     // Hex color for channel badge
+  order         Int         @default(0)
+  isActive      Boolean     @default(true)
+  allowPosts    Boolean     @default(true)
+  translations  Json?       // { "vi": { "name": "...", "description": "..." } }
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  posts         ForumPost[]
+  tags          ForumTag[]
+
+  @@index([slug])
+  @@index([order])
+  @@map("forum_channels")
+}
+
+model ForumTag {
+  id          String         @id @default(cuid())
+  name        String
+  slug        String
+  color       String?        // Hex color for tag badge
+  channelId   String
+  order       Int            @default(0)
+  translations Json?         // { "vi": { "name": "..." } }
+  createdAt   DateTime       @default(now())
+  channel     ForumChannel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  posts       ForumPostTag[]
+
+  @@unique([channelId, slug])
+  @@index([channelId])
+  @@map("forum_tags")
+}
+
+model ForumPost {
+  id            String             @id @default(cuid())
+  title         String
+  slug          String             @unique
+  content       String             @db.LongText
+  authorId      String
+  channelId     String
+  isPinned      Boolean            @default(false)
+  isLocked      Boolean            @default(false)
+  isAnswered    Boolean            @default(false)
+  views         Int                @default(0)
+  commentCount  Int                @default(0)
+  lastActivityAt DateTime          @default(now())
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  author        User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  channel       ForumChannel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  comments      ForumComment[]
+  reactions     ForumReaction[]
+  tags          ForumPostTag[]
+  upvotes       ForumUpvote[]
+  subscriptions ForumSubscription[]
+
+  @@index([authorId])
+  @@index([channelId])
+  @@index([slug])
+  @@index([isPinned])
+  @@index([lastActivityAt])
+  @@index([createdAt])
+  @@map("forum_posts")
+}
+
+model ForumPostTag {
+  id      String    @id @default(cuid())
+  postId  String
+  tagId   String
+  post    ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag     ForumTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, tagId])
+  @@index([postId])
+  @@index([tagId])
+  @@map("forum_post_tags")
+}
+
+model ForumComment {
+  id         String          @id @default(cuid())
+  content    String          @db.Text
+  authorId   String
+  postId     String
+  parentId   String?         // For nested replies (1 level)
+  isAnswer   Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  author     User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post       ForumPost       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent     ForumComment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: SetNull)
+  replies    ForumComment[]  @relation("CommentReplies")
+  reactions  ForumReaction[]
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentId])
+  @@index([createdAt])
+  @@map("forum_comments")
+}
+
+model ForumReaction {
+  id        String        @id @default(cuid())
+  emoji     String        // ❤️ 👍 🎉 😂
+  userId    String
+  postId    String?
+  commentId String?
+  createdAt DateTime      @default(now())
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      ForumPost?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment   ForumComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId, emoji])
+  @@unique([userId, commentId, emoji])
+  @@index([postId])
+  @@index([commentId])
+  @@index([userId])
+  @@map("forum_reactions")
+}
+
+model ForumUpvote {
+  id        String    @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([postId])
+  @@index([userId])
+  @@map("forum_upvotes")
+}
+
+model ForumSubscription {
+  id        String    @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([postId])
+  @@index([userId])
+  @@map("forum_subscriptions")
 }

@@ -71,6 +71,12 @@ import AdminKBCategoryForm from "./pages/admin/AdminKBCategoryForm";
 import UpgradePlan from "./pages/UpgradePlan";
 import AdminPremiumPlans from "./pages/admin/AdminPremiumPlans";
 import AdminDataImport from "./pages/admin/AdminDataImport";
+// Forum
+import Forum from "./pages/Forum";
+import ForumPostPage from "./pages/ForumPost";
+import ForumCreatePost from "./pages/ForumCreatePost";
+import AdminForumChannels from "./pages/admin/AdminForumChannels";
+import AdminForumPosts from "./pages/admin/AdminForumPosts";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -224,6 +230,27 @@ const App = () => (
                   <KnowledgeBase />
                 </ProtectedRoute>
               } />
+              {/* Forum Routes */}
+              <Route path="/user/forum" element={
+                <ProtectedRoute>
+                  <Forum />
+                </ProtectedRoute>
+              } />
+              <Route path="/user/forum/post/:id" element={
+                <ProtectedRoute>
+                  <ForumPostPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/user/forum/new" element={
+                <ProtectedRoute>
+                  <ForumCreatePost />
+                </ProtectedRoute>
+              } />
+              <Route path="/user/forum/edit/:id" element={
+                <ProtectedRoute>
+                  <ForumCreatePost />
+                </ProtectedRoute>
+              } />
               {/* Upgrade Plan - Hidden from menu */}
               <Route path="/user/upgrade" element={
                 <ProtectedRoute>
@@ -365,6 +392,17 @@ const App = () => (
               <Route path="/admin/knowledge-base/category/:id" element={
                 <AdminRoute>
                   <AdminKBCategoryForm />
+                </AdminRoute>
+              } />
+              {/* Admin Forum Routes */}
+              <Route path="/admin/forum/channels" element={
+                <AdminRoute>
+                  <AdminForumChannels />
+                </AdminRoute>
+              } />
+              <Route path="/admin/forum/posts" element={
+                <AdminRoute>
+                  <AdminForumPosts />
                 </AdminRoute>
               } />
               <Route path="/admin/premium-plans" element={

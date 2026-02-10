@@ -28,6 +28,7 @@ import {
   Crown,
   Package,
   Import,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -151,6 +152,14 @@ const AdminLayout = ({ children, defaultCollapsed = false }: AdminLayoutProps) =
       title: adminT.knowledgeBase,
       icon: BookOpen,
       href: "/admin/knowledge-base",
+    },
+    {
+      title: t.forum?.title || "Forum",
+      icon: MessageSquare,
+      children: [
+        { title: t.forum?.adminChannels || "Channels", href: "/admin/forum/channels", icon: MessageSquare },
+        { title: t.forum?.adminPosts || "Posts", href: "/admin/forum/posts", icon: MessageSquare },
+      ],
     },
     {
       title: "Email",

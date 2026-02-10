@@ -9,14 +9,15 @@ import {
   Edit,
   MoreVertical,
   Shield,
+  ShieldOff,
   User as UserIcon,
   Mail,
   Calendar,
   Key,
   Eye,
   EyeOff,
-  Headphones,  CheckCircle2,
-  XCircle,  CheckCircle2,
+  Headphones,
+  CheckCircle2,
   XCircle,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -119,6 +120,7 @@ const AdminUsers = () => {
     password: "",
     role: "USER",
     emailVerified: false,
+    twoFactorEnabled: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -223,7 +225,8 @@ const AdminUsers = () => {
       email: user.email,
       password: "",
       role: user.role || "USER",
-      emailVerified: user.emailVerified || false,
+      emailVerified: !!user.emailVerified,
+      twoFactorEnabled: user.twoFactorEnabled || false,
     });
     setShowEditSheet(true);
   };
@@ -234,13 +237,15 @@ const AdminUsers = () => {
     setIsUpdating(true);
     try {
       const token = localStorage.getItem("accessToken");
-      const updateData: { name?: string; email?: string; password?: string; role?: string; emailVerified?: boolean } = {};
+      const updateData: { name?: string; email?: string; password?: string; role?: string; emailVerified?: boolean; twoFactorEnabled?: boolean } = {};
       
       if (editForm.name !== editUser.name) updateData.name = editForm.name;
       if (editForm.email !== editUser.email) updateData.email = editForm.email;
       if (editForm.password) updateData.password = editForm.password;
       if (editForm.role !== editUser.role) updateData.role = editForm.role;
-      if (editForm.emailVerified !== editUser.emailVerified) updateData.emailVerified = editForm.emailVerified;
+      if (editForm.emailVerified !== !!editUser.emailVerified) updateData.emailVerified = editForm.emailVerified;
+      // Only send twoFactorEnabled when admin is disabling it (can't enable from here)
+      if (editUser.twoFactorEnabled && !editForm.twoFactorEnabled) updateData.twoFactorEnabled = false;
 
       const response = await fetch(`${API_URL}/api/admin/users/${editUser.id}`, {
         method: "PUT",
@@ -350,6 +355,12 @@ const AdminUsers = () => {
             ))}
           </div>
         )}
+        {user.twoFactorEnabled && (
+          <span className="px-2 py-0.5 rounded bg-green-500/10 text-green-600 dark:text-green-400 text-xs font-medium inline-flex items-center gap-1">
+            <Shield className="w-3 h-3" />
+            2FA
+          </span>
+        )}
       </div>
     </div>
   );
@@ -407,8 +418,9 @@ const AdminUsers = () => {
                       <TableRow>
                         <TableHead>User</TableHead>
                         <TableHead>{t.admin.role}</TableHead>
-                        <TableHead>Email Verified</TableHead>
+                        <TableHead>{t.admin?.emailVerifiedCol || 'Email'}</TableHead>
                         <TableHead>OAuth</TableHead>
+                        <TableHead>2FA</TableHead>
                         <TableHead>{t.admin.joinedAt}</TableHead>
                         <TableHead className="text-right">{t.common.actions}</TableHead>
                       </TableRow>
@@ -453,12 +465,23 @@ const AdminUsers = () => {
                             )}
                           </TableCell>
                           <TableCell>
-                            {user.oauthProvider ? (
-                              <span className="px-2 py-0.5 rounded bg-muted text-xs capitalize">
-                                {user.oauthProvider}
-                              </span>
+                            {user.accounts && user.accounts.length > 0 ? (
+                              <div className="flex gap-1">
+                                {user.accounts.map((acc: { provider: string }) => (
+                                  <span key={acc.provider} className="px-2 py-0.5 rounded bg-muted text-xs capitalize">
+                                    {acc.provider}
+                                  </span>
+                                ))}
+                              </div>
                             ) : (
                               <span className="text-muted-foreground text-sm">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {user.twoFactorEnabled ? (
+                              <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-muted-foreground" />
                             )}
                           </TableCell>
                           <TableCell>
@@ -786,6 +809,34 @@ const AdminUsers = () => {
                     {t.admin?.emailVerified || "Email Verified"}
                   </Label>
                 </div>
+
+                {editUser.twoFactorEnabled && (
+                  <div className="rounded-lg border border-border p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      {t.admin?.twoFactorStatus || "Two-Factor Authentication"}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {t.admin?.twoFactorActiveNote || "This user has 2FA enabled. Disabling it will remove their TOTP secret and recovery codes."}
+                    </p>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="edit-twoFactor"
+                        checked={editForm.twoFactorEnabled}
+                        onCheckedChange={(checked) =>
+                          setEditForm({ ...editForm, twoFactorEnabled: checked as boolean })
+                        }
+                      />
+                      <Label
+                        htmlFor="edit-twoFactor"
+                        className="text-sm font-medium leading-none cursor-pointer flex items-center gap-2"
+                      >
+                        <ShieldOff className="w-4 h-4" />
+                        {t.admin?.keep2FAEnabled || "Keep 2FA enabled"}
+                      </Label>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

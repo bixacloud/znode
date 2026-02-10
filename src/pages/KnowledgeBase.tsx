@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Search,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Loader2,
   ThumbsUp,
   ThumbsDown,
@@ -82,6 +84,7 @@ const KnowledgeBase = () => {
   const searchQuery = searchParams.get("q") || "";
   const [search, setSearch] = useState(searchQuery);
   const [hasRated, setHasRated] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   usePageTitle(articleSlug ? t.kb?.article || "Article" : t.kb?.title || "Knowledge Base");
 
@@ -105,6 +108,21 @@ const KnowledgeBase = () => {
     noCategories: t.kb?.noCategories || "No categories",
     articles: t.kb?.articles || "articles",
     back: t.common?.back || "Back",
+    moreArticles: t.kb?.moreArticles || "more articles",
+    showLess: t.kb?.showLess || "Show less",
+  };
+
+  // Toggle expanded state for a category
+  const toggleCategoryExpand = (categoryId: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId);
+      } else {
+        newSet.add(categoryId);
+      }
+      return newSet;
+    });
   };
 
   // Fetch categories with articles
@@ -363,7 +381,7 @@ const KnowledgeBase = () => {
                 {/* Articles */}
                 <div className="divide-y">
                   {cat.articles && cat.articles.length > 0 ? (
-                    cat.articles.slice(0, 5).map((art: Article) => (
+                    (expandedCategories.has(cat.id) ? cat.articles : cat.articles.slice(0, 5)).map((art: Article) => (
                       <div
                         key={art.id}
                         onClick={() => setSearchParams({ article: art.slug })}
@@ -382,8 +400,21 @@ const KnowledgeBase = () => {
                     </div>
                   )}
                   {cat.articles && cat.articles.length > 5 && (
-                    <div className="px-5 py-3 text-sm text-primary font-medium">
-                      +{cat.articles.length - 5} more articles
+                    <div
+                      onClick={() => toggleCategoryExpand(cat.id)}
+                      className="px-5 py-3 text-sm text-primary font-medium cursor-pointer hover:bg-accent transition-colors flex items-center gap-2"
+                    >
+                      {expandedCategories.has(cat.id) ? (
+                        <>
+                          <ChevronUp className="w-4 h-4" />
+                          {kbT.showLess}
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="w-4 h-4" />
+                          +{cat.articles.length - 5} {kbT.moreArticles}
+                        </>
+                      )}
                     </div>
                   )}
                 </div>

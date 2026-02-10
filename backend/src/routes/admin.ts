@@ -210,9 +210,10 @@ router.get('/users', adminMiddleware, async (req: AuthenticatedRequest, res: Res
           avatar: true,
           role: true,
           emailVerified: true,
+          twoFactorEnabled: true,
           createdAt: true,
-          _count: {
-            select: { accounts: true },
+          accounts: {
+            select: { provider: true },
           },
         },
       }),
@@ -397,6 +398,9 @@ router.put('/users/:id', adminMiddleware, async (req: AuthenticatedRequest, res:
       password?: string;
       role?: 'USER' | 'SUPPORT' | 'ADMIN';
       emailVerified?: Date | null;
+      twoFactorEnabled?: boolean;
+      twoFactorSecret?: string | null;
+      recoveryCodes?: string | null;
     } = {};
 
     if (name !== undefined) updateData.name = name;
@@ -407,6 +411,14 @@ router.put('/users/:id', adminMiddleware, async (req: AuthenticatedRequest, res:
     const { emailVerified } = req.body;
     if (emailVerified !== undefined) {
       updateData.emailVerified = emailVerified ? new Date() : null;
+    }
+
+    // Handle 2FA - admin can disable 2FA for users
+    const { twoFactorEnabled } = req.body;
+    if (twoFactorEnabled === false) {
+      updateData.twoFactorEnabled = false;
+      updateData.twoFactorSecret = null;
+      updateData.recoveryCodes = null;
     }
 
     // Hash new password if provided

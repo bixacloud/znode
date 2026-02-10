@@ -502,6 +502,52 @@ router.post('/setup', async (req: Request, res: Response) => {
         create: { key: 'LANDING_PAGE_ENABLED', value: 'false' },
       });
 
+      // 4f: Seed forum channels and tags
+      const forumSeedPath = path.join(BACKEND_DIR, 'src', 'data', 'forum-seed.json');
+      if (fs.existsSync(forumSeedPath)) {
+        try {
+          const forumChannels = JSON.parse(fs.readFileSync(forumSeedPath, 'utf-8'));
+          for (const channelData of forumChannels) {
+            const { tags, translations, ...channelFields } = channelData;
+            const channel = await installPrisma.forumChannel.upsert({
+              where: { slug: channelFields.slug },
+              update: {
+                name: channelFields.name,
+                description: channelFields.description,
+                icon: channelFields.icon,
+                color: channelFields.color,
+                order: channelFields.order,
+                isActive: channelFields.isActive,
+                allowPosts: channelFields.allowPosts,
+                translations: JSON.stringify(translations),
+              },
+              create: {
+                name: channelFields.name,
+                slug: channelFields.slug,
+                description: channelFields.description,
+                icon: channelFields.icon,
+                color: channelFields.color,
+                order: channelFields.order,
+                isActive: channelFields.isActive,
+                allowPosts: channelFields.allowPosts,
+                translations: JSON.stringify(translations),
+              },
+            });
+            for (const tagData of tags || []) {
+              const { translations: tagTranslations, ...tagFields } = tagData;
+              await installPrisma.forumTag.upsert({
+                where: { channelId_slug: { slug: tagFields.slug, channelId: channel.id } },
+                update: { name: tagFields.name, color: tagFields.color, order: tagFields.order, translations: JSON.stringify(tagTranslations) },
+                create: { name: tagFields.name, slug: tagFields.slug, color: tagFields.color, order: tagFields.order, channelId: channel.id, translations: JSON.stringify(tagTranslations) },
+              });
+            }
+          }
+          console.log(`[Install] Seeded ${forumChannels.length} forum channels with tags`);
+        } catch (forumError: any) {
+          console.error('[Install] Forum seed error (non-fatal):', forumError.message);
+        }
+      }
+
       console.log('[Install] Default data seeded');
 
       await installPrisma.$disconnect();

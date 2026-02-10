@@ -400,9 +400,9 @@ download_release() {
     process.stdin.on('end',()=>{
       try {
         const r=JSON.parse(d);
-        const a=r.assets&&r.assets.find(a=>a.name.endsWith('.zip'));
+        const a=r.assets&&r.assets.find(a=>a.name.endsWith('.tar.gz'));
         if(a) console.log(a.browser_download_url);
-        else { console.error('No zip asset found'); process.exit(1); }
+        else { console.error('No tar.gz asset found'); process.exit(1); }
       } catch(e) { console.error(e.message); process.exit(1); }
     });
   ")
@@ -413,7 +413,7 @@ download_release() {
   fi
 
   # Download
-  TMPFILE=$(mktemp /tmp/znode-release-XXXXXX.zip)
+  TMPFILE=$(mktemp /tmp/znode-release-XXXXXX.tar.gz)
   if ! curl -fsSL -o "$TMPFILE" "$DOWNLOAD_URL"; then
     rm -f "$TMPFILE"
     print_err "$(msg download_fail)"
@@ -422,7 +422,7 @@ download_release() {
 
   # Extract
   echo "$(msg extracting)"
-  unzip -qo "$TMPFILE" -d "$INSTALL_DIR"
+  tar xzf "$TMPFILE" -C "$INSTALL_DIR"
   rm -f "$TMPFILE"
 
   print_ok "Download & extract complete."

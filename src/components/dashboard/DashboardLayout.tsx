@@ -24,6 +24,7 @@ import {
   LayoutGrid,
   BookOpen,
   Globe,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -86,6 +87,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       title: t.kb?.title || 'Knowledge Base',
       icon: BookOpen,
       href: "/user/knowledge-base",
+    },
+    {
+      title: t.forum?.title || 'Forum',
+      icon: MessageSquare,
+      href: "/user/forum",
     },
     {
       title: t.nav?.tools || 'Tools',

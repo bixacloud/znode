@@ -1,0 +1,125 @@
+[
+  {
+    "name": "General Discussion",
+    "slug": "general",
+    "description": "Talk about anything related to web hosting, share your experiences, and connect with the community.",
+    "icon": "💬",
+    "color": "#6366f1",
+    "order": 1,
+    "isActive": true,
+    "allowPosts": true,
+    "translations": {
+      "vi": { "name": "Thảo luận chung", "description": "Nói về mọi thứ liên quan đến hosting, chia sẻ kinh nghiệm và kết nối với cộng đồng." },
+      "zh": { "name": "综合讨论", "description": "讨论与虚拟主机相关的任何话题，分享您的经验，与社区交流。" },
+      "fil": { "name": "Pangkalahatang Talakayan", "description": "Pag-usapan ang anumang bagay na may kaugnayan sa web hosting, ibahagi ang iyong karanasan, at kumonekta sa komunidad." }
+    },
+    "tags": [
+      { "name": "Discussion", "slug": "discussion", "color": "#6366f1", "order": 1, "translations": { "vi": { "name": "Thảo luận" }, "zh": { "name": "讨论" }, "fil": { "name": "Talakayan" } } },
+      { "name": "Off-Topic", "slug": "off-topic", "color": "#8b5cf6", "order": 2, "translations": { "vi": { "name": "Ngoài lề" }, "zh": { "name": "闲聊" }, "fil": { "name": "Labas sa Paksa" } } },
+      { "name": "Feedback", "slug": "feedback", "color": "#a78bfa", "order": 3, "translations": { "vi": { "name": "Phản hồi" }, "zh": { "name": "反馈" }, "fil": { "name": "Puna" } } }
+    ]
+  },
+  {
+    "name": "Help & Support",
+    "slug": "help-support",
+    "description": "Need help with your hosting account? Ask questions and get answers from the community.",
+    "icon": "🆘",
+    "color": "#ef4444",
+    "order": 2,
+    "isActive": true,
+    "allowPosts": true,
+    "translations": {
+      "vi": { "name": "Trợ giúp & Hỗ trợ", "description": "Cần trợ giúp về tài khoản hosting? Đặt câu hỏi và nhận câu trả lời từ cộng đồng." },
+      "zh": { "name": "帮助与支持", "description": "需要帮助管理您的主机账户？在这里提问，获取社区的帮助。" },
+      "fil": { "name": "Tulong at Suporta", "description": "Kailangan ng tulong sa iyong hosting account? Magtanong at makakuha ng sagot mula sa komunidad." }
+    },
+    "tags": [
+      { "name": "Question", "slug": "question", "color": "#ef4444", "order": 1, "translations": { "vi": { "name": "Câu hỏi" }, "zh": { "name": "提问" }, "fil": { "name": "Tanong" } } },
+      { "name": "Resolved", "slug": "resolved", "color": "#22c55e", "order": 2, "translations": { "vi": { "name": "Đã giải quyết" }, "zh": { "name": "已解决" }, "fil": { "name": "Nalutas" } } },
+      { "name": "DNS Issue", "slug": "dns-issue", "color": "#f97316", "order": 3, "translations": { "vi": { "name": "Vấn đề DNS" }, "zh": { "name": "DNS问题" }, "fil": { "name": "Problema sa DNS" } } },
+      { "name": "FTP Issue", "slug": "ftp-issue", "color": "#f59e0b", "order": 4, "translations": { "vi": { "name": "Vấn đề FTP" }, "zh": { "name": "FTP问题" }, "fil": { "name": "Problema sa FTP" } } },
+      { "name": "PHP/MySQL", "slug": "php-mysql", "color": "#3b82f6", "order": 5, "translations": { "vi": { "name": "PHP/MySQL" }, "zh": { "name": "PHP/MySQL" }, "fil": { "name": "PHP/MySQL" } } }
+    ]
+  },
+  {
+    "name": "Showcase",
+    "slug": "showcase",
+    "description": "Show off your websites and projects built on Znode hosting. Get feedback and inspire others!",
+    "icon": "🌟",
+    "color": "#f59e0b",
+    "order": 3,
+    "isActive": true,
+    "allowPosts": true,
+    "translations": {
+      "vi": { "name": "Trưng bày", "description": "Khoe website và dự án của bạn được xây dựng trên Znode hosting. Nhận phản hồi và truyền cảm hứng!" },
+      "zh": { "name": "作品展示", "description": "展示您在Znode主机上构建的网站和项目。获取反馈，激励他人！" },
+      "fil": { "name": "Vitrina", "description": "Ipakita ang iyong mga website at proyekto na ginawa sa Znode hosting. Makakuha ng feedback at mag-inspire!" }
+    },
+    "tags": [
+      { "name": "Website", "slug": "website", "color": "#f59e0b", "order": 1, "translations": { "vi": { "name": "Website" }, "zh": { "name": "网站" }, "fil": { "name": "Website" } } },
+      { "name": "Portfolio", "slug": "portfolio", "color": "#eab308", "order": 2, "translations": { "vi": { "name": "Portfolio" }, "zh": { "name": "作品集" }, "fil": { "name": "Portfolio" } } },
+      { "name": "WordPress", "slug": "wordpress", "color": "#21759b", "order": 3, "translations": { "vi": { "name": "WordPress" }, "zh": { "name": "WordPress" }, "fil": { "name": "WordPress" } } }
+    ]
+  },
+  {
+    "name": "Tutorials & Guides",
+    "slug": "tutorials",
+    "description": "Share and discover tutorials, tips, and guides for web development and hosting.",
+    "icon": "📚",
+    "color": "#22c55e",
+    "order": 4,
+    "isActive": true,
+    "allowPosts": true,
+    "translations": {
+      "vi": { "name": "Hướng dẫn & Thủ thuật", "description": "Chia sẻ và khám phá các hướng dẫn, mẹo và thủ thuật về phát triển web và hosting." },
+      "zh": { "name": "教程与指南", "description": "分享和发现关于Web开发和主机管理的教程、技巧和指南。" },
+      "fil": { "name": "Mga Tutorial at Gabay", "description": "Magbahagi at matuklasan ang mga tutorial, tip, at gabay para sa web development at hosting." }
+    },
+    "tags": [
+      { "name": "Tutorial", "slug": "tutorial", "color": "#22c55e", "order": 1, "translations": { "vi": { "name": "Hướng dẫn" }, "zh": { "name": "教程" }, "fil": { "name": "Tutorial" } } },
+      { "name": "Tips & Tricks", "slug": "tips-tricks", "color": "#16a34a", "order": 2, "translations": { "vi": { "name": "Mẹo & Thủ thuật" }, "zh": { "name": "技巧" }, "fil": { "name": "Tip at Trick" } } },
+      { "name": "How-To", "slug": "how-to", "color": "#15803d", "order": 3, "translations": { "vi": { "name": "Cách làm" }, "zh": { "name": "操作指南" }, "fil": { "name": "Paano" } } }
+    ]
+  },
+  {
+    "name": "Feature Requests",
+    "slug": "feature-requests",
+    "description": "Suggest new features and improvements for Znode. Vote on ideas you like!",
+    "icon": "💡",
+    "color": "#8b5cf6",
+    "order": 5,
+    "isActive": true,
+    "allowPosts": true,
+    "translations": {
+      "vi": { "name": "Yêu cầu tính năng", "description": "Đề xuất tính năng mới và cải tiến cho Znode. Bình chọn cho ý tưởng bạn thích!" },
+      "zh": { "name": "功能请求", "description": "为Znode提出新功能和改进建议。为您喜欢的想法投票！" },
+      "fil": { "name": "Mga Kahilingan sa Feature", "description": "Magmungkahi ng mga bagong feature at pagpapabuti para sa Znode. Bumoto sa mga ideya na gusto mo!" }
+    },
+    "tags": [
+      { "name": "Idea", "slug": "idea", "color": "#8b5cf6", "order": 1, "translations": { "vi": { "name": "Ý tưởng" }, "zh": { "name": "想法" }, "fil": { "name": "Ideya" } } },
+      { "name": "Under Review", "slug": "under-review", "color": "#a78bfa", "order": 2, "translations": { "vi": { "name": "Đang xem xét" }, "zh": { "name": "审核中" }, "fil": { "name": "Sinusuri" } } },
+      { "name": "Planned", "slug": "planned", "color": "#22c55e", "order": 3, "translations": { "vi": { "name": "Đã lên kế hoạch" }, "zh": { "name": "已计划" }, "fil": { "name": "Naplano" } } },
+      { "name": "Completed", "slug": "completed", "color": "#16a34a", "order": 4, "translations": { "vi": { "name": "Hoàn thành" }, "zh": { "name": "已完成" }, "fil": { "name": "Nakumpleto" } } }
+    ]
+  },
+  {
+    "name": "Announcements",
+    "slug": "announcements",
+    "description": "Official announcements, updates, and news from the Znode team.",
+    "icon": "📢",
+    "color": "#0ea5e9",
+    "order": 6,
+    "isActive": true,
+    "allowPosts": false,
+    "translations": {
+      "vi": { "name": "Thông báo", "description": "Thông báo chính thức, cập nhật và tin tức từ đội ngũ Znode." },
+      "zh": { "name": "公告", "description": "Znode团队的官方公告、更新和新闻。" },
+      "fil": { "name": "Mga Anunsyo", "description": "Mga opisyal na anunsyo, update, at balita mula sa Znode team." }
+    },
+    "tags": [
+      { "name": "Update", "slug": "update", "color": "#0ea5e9", "order": 1, "translations": { "vi": { "name": "Cập nhật" }, "zh": { "name": "更新" }, "fil": { "name": "Update" } } },
+      { "name": "Maintenance", "slug": "maintenance", "color": "#f97316", "order": 2, "translations": { "vi": { "name": "Bảo trì" }, "zh": { "name": "维护" }, "fil": { "name": "Maintenance" } } },
+      { "name": "New Feature", "slug": "new-feature", "color": "#22c55e", "order": 3, "translations": { "vi": { "name": "Tính năng mới" }, "zh": { "name": "新功能" }, "fil": { "name": "Bagong Feature" } } }
+    ]
+  }
+]

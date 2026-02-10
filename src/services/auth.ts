@@ -5,10 +5,11 @@ export interface User {
   email: string;
   name: string | null;
   avatar: string | null;
-  role?: 'USER' | 'ADMIN';
+  role?: 'USER' | 'ADMIN' | 'SUPPORT';
   emailVerified?: Date | null;
+  twoFactorEnabled?: boolean;
   createdAt?: string;
-  accounts?: { provider: string; createdAt: string }[];
+  accounts?: { provider: string; createdAt?: string }[];
 }
 
 export interface AuthResponse {
