@@ -1,0 +1,447 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   FREE HOSTING MANAGEMENT DESIGN SYSTEM
+   Modern, Professional, Tech-focused
+   ======================================== */
+
+@layer base {
+  :root {
+    /* ================================================
+       ZNODE DESIGN SYSTEM — LIGHT MODE
+       Eye-comfort optimized for long developer sessions
+       WCAG AA compliant (≥4.5:1 body text contrast)
+       ================================================ */
+
+    /* --- Surface / Background Levels --- */
+    --background: 210 20% 98%;       /* #F8FAFC — off-white, no glare */
+    --foreground: 224 50% 11%;       /* #0F172A — Slate-900, high-emphasis */
+
+    --card: 0 0% 100%;               /* #FFFFFF — cards float above background */
+    --card-foreground: 224 50% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 50% 11%;
+
+    /* --- Brand / Primary — Indigo --- */
+    --primary: 234 89% 56%;          /* #4F46E5 — vibrant but not neon */
+    --primary-foreground: 0 0% 100%;
+
+    /* --- Secondary — Cool Slate --- */
+    --secondary: 220 14% 96%;        /* #F1F5F9 */
+    --secondary-foreground: 224 50% 11%;
+
+    /* --- Muted — Disabled/Placeholder --- */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;  /* #64748B — Slate-500 (AA on white) */
+
+    /* --- Accent — Teal/Cyan --- */
+    --accent: 187 92% 43%;           /* #06B6D4 */
+    --accent-foreground: 0 0% 100%;
+
+    /* --- Semantic Status Colors --- */
+    --success: 142 76% 36%;          /* #16A34A */
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;           /* #F59E0B */
+    --warning-foreground: 224 50% 11%; /* dark text for AA on amber bg */
+
+    --info: 217 91% 60%;             /* #3B82F6 */
+    --info-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;        /* #EF4444 */
+    --destructive-foreground: 0 0% 100%;
+
+    /* --- Borders & Inputs --- */
+    --border: 220 13% 91%;           /* #E2E8F0 */
+    --input: 220 13% 91%;
+    --ring: 234 89% 56%;             /* matches primary */
+
+    --radius: 0.75rem;
+
+    /* --- Sidebar --- */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 224 50% 11%;
+    --sidebar-primary: 234 89% 56%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 224 50% 11%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 234 89% 56%;
+
+    /* --- Chart Palette (5 distinct hues) --- */
+    --chart-1: 234 89% 56%;          /* Indigo (primary) */
+    --chart-2: 187 92% 43%;          /* Cyan (accent) */
+    --chart-3: 142 76% 36%;          /* Green (success) */
+    --chart-4: 38 92% 50%;           /* Amber (warning) */
+    --chart-5: 280 68% 55%;          /* Violet */
+
+    /* --- Landing Page Surfaces --- */
+    --landing-surface: 210 20% 98%;  /* off-white, same as bg */
+    --landing-surface-alt: 0 0% 100%; /* white sections */
+
+    /* --- Gradients --- */
+    --gradient-primary: linear-gradient(135deg, hsl(234 89% 56%) 0%, hsl(260 84% 60%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(187 92% 43%) 0%, hsl(199 89% 48%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(224 50% 8%) 0%, hsl(234 60% 20%) 50%, hsl(260 50% 25%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 20% 98%) 100%);
+
+    /* --- Buttons --- */
+    --btn-primary: 234 89% 56%;               /* matches --primary */
+    --btn-primary-foreground: 0 0% 100%;
+    --btn-primary-hover: 234 89% 48%;          /* 8% darker for depth */
+
+    --btn-secondary: 220 14% 96%;             /* matches --secondary */
+    --btn-secondary-foreground: 224 50% 11%;
+    --btn-secondary-hover: 220 14% 90%;       /* subtle darken */
+
+    --btn-outline-border: 220 13% 80%;        /* slightly stronger than --border */
+    --btn-outline-hover: 234 89% 97%;         /* faint primary tint */
+    --btn-outline-hover-border: 234 89% 56%;  /* primary border on hover */
+
+    --btn-destructive: 0 84% 60%;             /* matches --destructive */
+    --btn-destructive-foreground: 0 0% 100%;
+    --btn-destructive-hover: 0 84% 52%;       /* 8% darker */
+
+    --btn-ghost-hover: 220 14% 93%;           /* very subtle fill */
+
+    --btn-success: 142 76% 36%;               /* matches --success */
+    --btn-success-foreground: 0 0% 100%;
+    --btn-success-hover: 142 76% 30%;         /* darker green */
+
+    --btn-warning: 38 92% 50%;                /* matches --warning */
+    --btn-warning-foreground: 224 50% 11%;    /* dark text for AA */
+    --btn-warning-hover: 38 92% 44%;          /* darker amber */
+
+    /* --- Shadows --- */
+    --shadow-sm: 0 1px 2px 0 hsl(224 50% 11% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(224 50% 11% / 0.08), 0 2px 4px -2px hsl(224 50% 11% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(224 50% 11% / 0.08), 0 4px 6px -4px hsl(224 50% 11% / 0.04);
+    --shadow-xl: 0 20px 25px -5px hsl(224 50% 11% / 0.08), 0 8px 10px -6px hsl(224 50% 11% / 0.04);
+    --shadow-glow: 0 0 40px hsl(234 89% 56% / 0.25);
+  }
+
+  .dark {
+    /* ================================================
+       ZNODE DESIGN SYSTEM — DARK MODE
+       Deep slate (no pure black #000) — anti-smear
+       Status colors desaturated — anti-vibration
+       Text capped at Slate-100 (no pure #FFF)
+       ================================================ */
+
+    /* --- Surface / Background Levels --- */
+    --background: 224 50% 6%;        /* #0B1120 — deep rich slate */
+    --foreground: 214 32% 91%;       /* #E2E8F0 — Slate-200, never #FFF */
+
+    --card: 224 47% 9%;              /* #111827 — slightly lifted */
+    --card-foreground: 214 32% 91%;
+
+    --popover: 224 47% 9%;
+    --popover-foreground: 214 32% 91%;
+
+    /* --- Brand / Primary — Lighter to pop on dark --- */
+    --primary: 234 89% 66%;          /* #818CF8 — Indigo-400 */
+    --primary-foreground: 0 0% 100%;
+
+    /* --- Secondary --- */
+    --secondary: 224 47% 14%;        /* #1E293B */
+    --secondary-foreground: 214 32% 91%;
+
+    /* --- Muted --- */
+    --muted: 224 47% 14%;
+    --muted-foreground: 215 16% 57%; /* #94A3B8 — Slate-400 (AA on dark) */
+
+    /* --- Accent --- */
+    --accent: 224 47% 18%;
+    --accent-foreground: 214 32% 91%;
+
+    /* --- Semantic Status (desaturated for dark bg) --- */
+    --success: 142 60% 50%;          /* pastel green — no vibration */
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 75% 55%;           /* softened amber */
+    --warning-foreground: 224 50% 6%;
+
+    --info: 217 80% 65%;             /* softer blue */
+    --info-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 55%;        /* desaturated red */
+    --destructive-foreground: 0 0% 100%;
+
+    /* --- Borders & Inputs --- */
+    --border: 224 30% 18%;           /* visible but not distracting */
+    --input: 224 30% 18%;
+    --ring: 234 89% 66%;
+
+    /* --- Sidebar --- */
+    --sidebar-background: 224 50% 6%;
+    --sidebar-foreground: 214 32% 91%;
+    --sidebar-primary: 234 89% 66%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 224 47% 12%;
+    --sidebar-accent-foreground: 214 32% 91%;
+    --sidebar-border: 224 47% 14%;
+    --sidebar-ring: 234 89% 66%;
+
+    /* --- Chart Palette (lighter for dark bg) --- */
+    --chart-1: 234 89% 66%;          /* Indigo-400 */
+    --chart-2: 187 72% 55%;          /* Cyan, desaturated */
+    --chart-3: 142 60% 50%;          /* Green, softened */
+    --chart-4: 38 75% 55%;           /* Amber, softened */
+    --chart-5: 280 55% 65%;          /* Violet, pastel */
+
+    /* --- Landing Page Surfaces --- */
+    --landing-surface: 224 55% 5%;   /* #0A0F1E — deep immersive dark */
+    --landing-surface-alt: 224 47% 7%; /* subtle alternating sections */
+
+    /* --- Gradients --- */
+    --gradient-hero: linear-gradient(135deg, hsl(224 55% 4%) 0%, hsl(234 60% 12%) 50%, hsl(260 50% 15%) 100%);
+
+    /* --- Buttons (lighter primaries for dark bg) --- */
+    --btn-primary: 234 89% 66%;               /* matches dark --primary */
+    --btn-primary-foreground: 0 0% 100%;
+    --btn-primary-hover: 234 89% 74%;          /* lighter for dark mode hover */
+
+    --btn-secondary: 224 47% 14%;             /* matches dark --secondary */
+    --btn-secondary-foreground: 214 32% 91%;
+    --btn-secondary-hover: 224 47% 20%;       /* subtle lighten */
+
+    --btn-outline-border: 224 30% 25%;        /* slightly stronger than dark --border */
+    --btn-outline-hover: 234 89% 66% / 0.08;  /* faint primary glow */
+    --btn-outline-hover-border: 234 89% 66%;  /* primary border on hover */
+
+    --btn-destructive: 0 62% 55%;             /* desaturated red for dark */
+    --btn-destructive-foreground: 0 0% 100%;
+    --btn-destructive-hover: 0 62% 62%;       /* lighter for dark hover */
+
+    --btn-ghost-hover: 224 47% 14%;           /* subtle fill on dark bg */
+
+    --btn-success: 142 60% 50%;               /* matches dark --success */
+    --btn-success-foreground: 0 0% 100%;
+    --btn-success-hover: 142 60% 57%;         /* lighter green */
+
+    --btn-warning: 38 75% 55%;                /* matches dark --warning */
+    --btn-warning-foreground: 224 50% 6%;     /* dark text for AA */
+    --btn-warning-hover: 38 75% 62%;          /* lighter amber */
+
+    /* --- Shadows (subtle glow instead of drop) --- */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.4), 0 4px 6px -4px hsl(0 0% 0% / 0.2);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.4), 0 8px 10px -6px hsl(0 0% 0% / 0.2);
+    --shadow-glow: 0 0 40px hsl(234 89% 66% / 0.15);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  code, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+
+  .bg-gradient-hero {
+    background-image: var(--gradient-hero);
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 ease-out hover:shadow-xl hover:border-primary/20;
+  }
+}
+
+/* Animations */
+@layer utilities {
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.4s ease-out forwards;
+  }
+
+  .delay-300 { animation-delay: 300ms; }
+  .delay-500 { animation-delay: 500ms; }
+  .delay-700 { animation-delay: 700ms; }
+  .delay-1000 { animation-delay: 1000ms; }
+}
+
+/* Status badge styles */
+@layer components {
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .status-active {
+    @apply bg-success/10 text-success;
+  }
+  
+  .status-pending {
+    @apply bg-warning/10 text-warning;
+  }
+  
+  .status-suspended {
+    @apply bg-destructive/10 text-destructive;
+  }
+  
+  .status-deactivated {
+    @apply bg-muted text-muted-foreground;
+  }
+}
+
+/* Markdown Editor Styles */
+.markdown-editor-wrapper {
+  @apply rounded-lg overflow-hidden border border-border;
+}
+
+.markdown-editor-wrapper .w-md-editor {
+  @apply !border-0 !shadow-none;
+}
+
+/* Light mode */
+.markdown-editor-wrapper[data-color-mode="auto"] .w-md-editor {
+  --color-canvas-default: hsl(var(--background));
+  --color-canvas-subtle: hsl(var(--muted));
+  --color-border-default: hsl(var(--border));
+  --color-border-muted: hsl(var(--border));
+  --color-fg-default: hsl(var(--foreground));
+  --color-fg-muted: hsl(var(--muted-foreground));
+  --color-accent-fg: hsl(var(--primary));
+}
+
+/* Dark mode */
+.dark .markdown-editor-wrapper[data-color-mode="auto"] .w-md-editor,
+[data-color-mode="dark"] .markdown-editor-wrapper .w-md-editor {
+  --color-canvas-default: hsl(var(--background));
+  --color-canvas-subtle: hsl(var(--muted));
+  --color-border-default: hsl(var(--border));
+  --color-border-muted: hsl(var(--border));
+  --color-fg-default: hsl(var(--foreground));
+  --color-fg-muted: hsl(var(--muted-foreground));
+  --color-accent-fg: hsl(var(--primary));
+  background-color: hsl(var(--background)) !important;
+}
+
+.markdown-editor-wrapper .w-md-editor-toolbar {
+  @apply !bg-muted/50 !border-b !border-border;
+}
+
+.markdown-editor-wrapper .w-md-editor-toolbar li > button {
+  @apply !text-foreground hover:!bg-muted;
+}
+
+.markdown-editor-wrapper .w-md-editor-toolbar li.active > button {
+  @apply !bg-primary/10 !text-primary;
+}
+
+.markdown-editor-wrapper .w-md-editor-content {
+  @apply !bg-background;
+}
+
+.markdown-editor-wrapper .w-md-editor-text-input,
+.markdown-editor-wrapper .w-md-editor-text-pre {
+  @apply !text-foreground !font-mono !text-sm;
+}
+
+.markdown-editor-wrapper .w-md-editor-preview {
+  @apply !bg-background !text-foreground;
+}
+
+.markdown-editor-wrapper .wmde-markdown {
+  @apply !bg-transparent;
+}
+
+/* Puck Editor: force entire editor to always render in light mode
+   This resets all CSS custom properties so Puck UI (sidebar, canvas, etc.) stays readable in dark mode */
+.puck-force-light {
+  color-scheme: light !important;
+
+  /* Surface / Background */
+  --background: 210 20% 98%;
+  --foreground: 224 50% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 50% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 50% 11%;
+
+  /* Brand */
+  --primary: 234 89% 56%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 224 50% 11%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+  --accent: 187 92% 43%;
+  --accent-foreground: 0 0% 100%;
+
+  /* Semantic */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 100%;
+
+  /* Borders */
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 234 89% 56%;
+
+  /* Sidebar */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 224 50% 11%;
+  --sidebar-primary: 234 89% 56%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 14% 96%;
+  --sidebar-accent-foreground: 224 50% 11%;
+  --sidebar-border: 220 13% 91%;
+
+  /* Force all text and backgrounds */
+  background-color: hsl(210 20% 98%) !important;
+  color: hsl(224 50% 11%) !important;
+}
+
+.puck-force-light *,
+.puck-force-light *::before,
+.puck-force-light *::after {
+  color-scheme: light !important;
+}
+
+/* Ensure iframe inside Puck also uses light mode */
+.puck-force-light iframe {
+  color-scheme: light !important;
+}

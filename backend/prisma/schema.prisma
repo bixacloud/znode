@@ -1,0 +1,490 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String                   @id @default(cuid())
+  email                   String                   @unique
+  password                String?
+  name                    String?
+  avatar                  String?
+  role                    Role                     @default(USER)
+  emailVerified           DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  adminSignature          String?                  @db.Text
+  twoFactorEnabled        Boolean                  @default(false)
+  twoFactorSecret         String?
+  recoveryCodes           String?                  @db.Text
+  accounts                Account[]
+  hostings                Hosting[]
+  notifications           Notification[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  ticketReplies           TicketReply[]            @relation("SupportReplies")
+  tickets                 Ticket[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String
+  providerAccountId String
+  accessToken       String?  @db.Text
+  refreshToken      String?  @db.Text
+  expiresAt         Int?
+  tokenType         String?
+  scope             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId], map: "accounts_userId_fkey")
+  @@map("accounts")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "password_reset_tokens_userId_fkey")
+  @@map("password_reset_tokens")
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  otp       String?  // 6-digit OTP code
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("email_verification_tokens")
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model Hosting {
+  id               String           @id @default(cuid())
+  userId           String
+  vpUsername       String           @unique
+  username         String
+  domain           String
+  package          String
+  status           HostingStatus    @default(PENDING)
+  sqlCluster       String?
+  suspendReason    String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  activatedAt      DateTime?
+  suspendedAt      DateTime?
+  deletedAt        DateTime?
+  label            String?
+  password         String?
+  cpanelApproved   Boolean          @default(false)
+  cpanelApprovedAt DateTime?
+  isCustomDomain   Boolean          @default(false)
+  databases        Database[]
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sslCertificates  SSLCertificate[]
+  tickets          Ticket[]
+
+  @@index([userId], map: "hostings_userId_fkey")
+  @@map("hostings")
+}
+
+model Database {
+  id        String   @id @default(cuid())
+  hostingId String
+  name      String
+  fullName  String
+  createdAt DateTime @default(now())
+  hosting   Hosting  @relation(fields: [hostingId], references: [id], onDelete: Cascade)
+
+  @@unique([hostingId, name])
+  @@map("databases")
+}
+
+model Ticket {
+  id           String        @id @default(cuid())
+  userId       String
+  hostingId    String?
+  mofhTicketId String?       @unique
+  subject      String
+  message      String        @db.Text
+  status       TicketStatus  @default(OPEN)
+  supportToken String?       @unique
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  replies      TicketReply[]
+  hosting      Hosting?      @relation(fields: [hostingId], references: [id])
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([hostingId], map: "tickets_hostingId_fkey")
+  @@index([userId], map: "tickets_userId_fkey")
+  @@map("tickets")
+}
+
+model TicketReply {
+  id            String    @id @default(cuid())
+  ticketId      String
+  message       String    @db.Text
+  isSupport     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  supportUserId String?
+  ratedAt       DateTime?
+  rating        Int?
+  ratingComment String?   @db.Text
+  supportUser   User?     @relation("SupportReplies", fields: [supportUserId], references: [id])
+  ticket        Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([supportUserId], map: "ticket_replies_supportUserId_fkey")
+  @@index([ticketId], map: "ticket_replies_ticketId_fkey")
+  @@map("ticket_replies")
+}
+
+model EmailTemplate {
+  id        String            @id @default(cuid())
+  code      String            @unique
+  name      String
+  subject   String
+  body      String            @db.Text
+  type      EmailTemplateType @default(CUSTOM)
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@map("email_templates")
+}
+
+model EmailLog {
+  id         String    @id @default(cuid())
+  templateId String?
+  toEmail    String
+  toUserId   String?
+  subject    String
+  body       String    @db.Text
+  status     String    @default("PENDING")
+  error      String?   @db.Text
+  sentAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@map("email_logs")
+}
+
+model SSLCertificate {
+  id                String        @id @default(cuid())
+  hostingId         String
+  domain            String
+  domainType        SSLDomainType
+  provider          SSLProvider   @default(LETS_ENCRYPT)
+  status            SSLStatus     @default(PENDING_VERIFICATION)
+  verificationToken String?
+  cnameRecord       String?
+  txtRecord         String?
+  verifiedAt        DateTime?
+  certificate       String?       @db.Text
+  privateKey        String?       @db.Text
+  caCertificate     String?       @db.Text
+  expiresAt         DateTime?
+  issuedAt          DateTime?
+  acmeOrderUrl      String?
+  acmeAccountUrl    String?
+  lastError         String?       @db.Text
+  retryCount        Int           @default(0)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  dnsRecordId       String?
+  hosting           Hosting       @relation(fields: [hostingId], references: [id], onDelete: Cascade)
+
+  @@unique([hostingId, domain])
+  @@index([status])
+  @@map("ssl_certificates")
+}
+
+model SSLConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("ssl_config")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  metadata  String?          @db.Text
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+enum Role {
+  USER
+  SUPPORT
+  ADMIN
+}
+
+enum HostingStatus {
+  PENDING
+  ACTIVE
+  SUSPENDING
+  SUSPENDED
+  REACTIVATING
+  DELETED
+}
+
+enum TicketStatus {
+  OPEN
+  REPLIED
+  CLOSED
+}
+
+enum EmailTemplateType {
+  SYSTEM
+  CUSTOM
+}
+
+enum SSLProvider {
+  LETS_ENCRYPT
+  GOOGLE_TRUST
+}
+
+enum SSLStatus {
+  PENDING_VERIFICATION
+  VERIFYING
+  VERIFIED
+  ISSUING
+  ISSUED
+  FAILED
+  EXPIRED
+  REVOKED
+}
+
+enum SSLDomainType {
+  SUBDOMAIN
+  CUSTOM
+}
+
+enum NotificationType {
+  LOGIN
+  LOGOUT
+  PASSWORD_CHANGE
+  OTP_ENABLED
+  OTP_DISABLED
+  PROFILE_UPDATE
+  HOSTING_CREATED
+  HOSTING_ACTIVATED
+  HOSTING_SUSPENDED
+  HOSTING_REACTIVATED
+  HOSTING_DELETED
+  TICKET_CREATED
+  TICKET_REPLIED
+  TICKET_CLOSED
+  ADMIN_BLOCKED
+  ADMIN_UNBLOCKED
+  SSL_ISSUED
+  SSL_FAILED
+  SSL_EXPIRED
+  OTHER
+}
+
+// Backup & Restore Models
+model BackupConfig {
+  id                String            @id @default(cuid())
+  name              String
+  storageType       BackupStorageType
+  localPath         String?
+  ftpHost           String?
+  ftpPort           Int?              @default(21)
+  ftpUsername       String?
+  ftpPassword       String?
+  ftpPath           String?
+  ftpSecure         Boolean           @default(false)
+  // Google Drive OAuth tokens (user-based auth instead of service account)
+  googleDriveAccessToken   String?    @db.Text
+  googleDriveRefreshToken  String?    @db.Text
+  googleDriveTokenExpiry   DateTime?
+  googleDriveEmail         String?
+  googleDriveFolderId      String?
+  // Legacy service account field (deprecated)
+  googleDriveCredentials   String?    @db.Text
+  scheduleEnabled   Boolean           @default(false)
+  scheduleType      BackupScheduleType?
+  scheduleTime      String?           // HH:mm format
+  scheduleDays      String?           // comma separated days for weekly (0-6)
+  retentionDays     Int               @default(30)
+  includeDatabase   Boolean           @default(true)
+  includeUploads    Boolean           @default(true)
+  isActive          Boolean           @default(true)
+  lastBackupAt      DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  backups           BackupHistory[]
+
+  @@map("backup_configs")
+}
+
+model BackupHistory {
+  id            String       @id @default(cuid())
+  configId      String?
+  config        BackupConfig? @relation(fields: [configId], references: [id], onDelete: SetNull)
+  filename      String
+  fileSize      BigInt       @default(0)
+  storageType   BackupStorageType
+  storagePath   String
+  status        BackupStatus @default(PENDING)
+  errorMessage  String?      @db.Text
+  isManual      Boolean      @default(false)
+  startedAt     DateTime     @default(now())
+  completedAt   DateTime?
+  createdAt     DateTime     @default(now())
+
+  @@index([configId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("backup_history")
+}
+
+enum BackupStorageType {
+  LOCAL
+  FTP
+  SFTP
+  GOOGLE_DRIVE
+}
+
+enum BackupScheduleType {
+  DAILY
+  WEEKLY
+}
+
+enum BackupStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+// Landing Page Builder
+model LandingPage {
+  id          String   @id @default(cuid())
+  locale      String   @default("en") // vi, en
+  projectData Json     @db.Json // GrapesJS project data
+  html        String?  @db.LongText // Compiled HTML
+  css         String?  @db.LongText // Compiled CSS
+  isActive    Boolean  @default(false) // If true, use custom page instead of default
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([locale])
+  @@map("landing_pages")
+}
+
+// Knowledge Base
+model KBCategory {
+  id            String      @id @default(cuid())
+  name          String      // Default name (fallback)
+  slug          String      @unique
+  description   String?     @db.Text  // Default description
+  icon          String?     // Icon name or emoji
+  order         Int         @default(0)
+  isActive      Boolean     @default(true)
+  translations  Json?       // { "vi": { "name": "...", "description": "..." }, "ja": {...} }
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  articles      KBArticle[]
+
+  @@index([slug])
+  @@index([order])
+  @@map("kb_categories")
+}
+
+model KBArticle {
+  id          String     @id @default(cuid())
+  categoryId  String
+  title       String     // Default title (fallback)
+  slug        String     @unique
+  content     String     @db.LongText  // Default content
+  excerpt     String?    @db.Text      // Default excerpt
+  translations Json?     // { "vi": { "title": "...", "content": "...", "excerpt": "..." }, "ja": {...} }
+  views       Int        @default(0)
+  helpful     Int        @default(0)
+  notHelpful  Int        @default(0)
+  isActive    Boolean    @default(true)
+  order       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  category    KBCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([isActive])
+  @@map("kb_articles")
+}
+
+// Premium Plans for upgrade
+model PremiumPlan {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  description   String?  @db.Text
+  price         Float
+  currency      String   @default("USD")
+  billingCycle  String   @default("monthly") // monthly, yearly, lifetime
+  features      Json?    // Array of feature strings
+  specs         Json?    // { disk: "10GB", bandwidth: "100GB", domains: 5, ... }
+  affiliateUrl  String?  @db.Text  // External affiliate link
+  isPopular     Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  order         Int      @default(0)
+  translations  Json?    // { "vi": { "name": "...", "description": "...", "features": [...] } }
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([slug])
+  @@index([order])
+  @@map("premium_plans")
+}
