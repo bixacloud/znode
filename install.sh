@@ -545,7 +545,7 @@ ENVEOF
   # Build TypeScript
   echo ""
   echo -e "${BLUE}$(msg building_be)${NC}"
-  if ! NODE_OPTIONS="--max-old-space-size=1024" npx tsc 2>&1; then
+  if ! node scripts/build.mjs 2>&1; then
     print_err "$(msg build_fail)"
     exit 1
   fi
