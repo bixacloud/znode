@@ -35,10 +35,12 @@ MSG_EN=(
   [node_version]="Node.js version"
   [npm_version]="npm version"
   [node_not_found]="Node.js not found! Please ensure CloudPanel installed Node.js for this site."
-  [checking_port]="Finding available port..."
+  [enter_port]="Enter backend port (default: auto-detect from 3000):"
   [port_in_use]="Port %s is in use, trying next..."
   [port_selected]="Selected port: %s"
-  [no_port]="Could not find an available port (tried 3002-3100). Exiting."
+  [port_invalid]="Invalid port number. Please enter a number between 1024 and 65535."
+  [port_busy]="Port %s is already in use! Please choose another port."
+  [no_port]="Could not find an available port (tried 3000-3100). Exiting."
   [downloading]="Downloading latest ZNode release..."
   [download_fail]="Failed to download. Check your internet connection."
   [extracting]="Extracting files..."
@@ -87,10 +89,12 @@ MSG_VI=(
   [node_version]="Phiên bản Node.js"
   [npm_version]="Phiên bản npm"
   [node_not_found]="Không tìm thấy Node.js! Hãy đảm bảo CloudPanel đã cài Node.js cho site này."
-  [checking_port]="Đang tìm cổng khả dụng..."
+  [enter_port]="Nhập port backend (mặc định: tự tìm từ 3000):"
   [port_in_use]="Cổng %s đang được sử dụng, thử cổng tiếp theo..."
   [port_selected]="Cổng đã chọn: %s"
-  [no_port]="Không tìm thấy cổng khả dụng (đã thử 3002-3100). Thoát."
+  [port_invalid]="Số port không hợp lệ. Vui lòng nhập số từ 1024 đến 65535."
+  [port_busy]="Cổng %s đang được sử dụng! Vui lòng chọn cổng khác."
+  [no_port]="Không tìm thấy cổng khả dụng (đã thử 3000-3100). Thoát."
   [downloading]="Đang tải phiên bản ZNode mới nhất..."
   [download_fail]="Tải thất bại. Kiểm tra kết nối internet."
   [extracting]="Đang giải nén..."
@@ -139,10 +143,12 @@ MSG_ZH=(
   [node_version]="Node.js 版本"
   [npm_version]="npm 版本"
   [node_not_found]="未找到 Node.js！请确保 CloudPanel 已为此站点安装 Node.js。"
-  [checking_port]="正在查找可用端口..."
+  [enter_port]="请输入后端端口（默认：从 3000 自动检测）："
   [port_in_use]="端口 %s 已被占用，尝试下一个..."
   [port_selected]="已选择端口: %s"
-  [no_port]="找不到可用端口（已尝试 3002-3100）。退出。"
+  [port_invalid]="端口号无效。请输入 1024 到 65535 之间的数字。"
+  [port_busy]="端口 %s 已被占用！请选择其他端口。"
+  [no_port]="找不到可用端口（已尝试 3000-3100）。退出。"
   [downloading]="正在下载最新版 ZNode..."
   [download_fail]="下载失败。请检查网络连接。"
   [extracting]="正在解压..."
@@ -191,10 +197,12 @@ MSG_FIL=(
   [node_version]="Node.js version"
   [npm_version]="npm version"
   [node_not_found]="Hindi nahanap ang Node.js! Siguraduhing naka-install ang Node.js sa CloudPanel."
-  [checking_port]="Naghahanap ng available na port..."
+  [enter_port]="Ilagay ang backend port (default: auto-detect mula 3000):"
   [port_in_use]="Port %s ay ginagamit na, sinusubukan ang susunod..."
   [port_selected]="Napiling port: %s"
-  [no_port]="Walang available na port (sinubukan 3002-3100). Lumalabas."
+  [port_invalid]="Hindi valid ang port number. Maglagay ng numero mula 1024 hanggang 65535."
+  [port_busy]="Port %s ay ginagamit na! Pumili ng ibang port."
+  [no_port]="Walang available na port (sinubukan 3000-3100). Lumalabas."
   [downloading]="Dina-download ang pinakabagong ZNode release..."
   [download_fail]="Nabigo ang download. Suriin ang internet connection."
   [extracting]="Nag-e-extract ng mga file..."
@@ -345,13 +353,42 @@ detect_environment() {
   print_ok "PM2: ${BOLD}$(pm2 -v)${NC}"
 }
 
-# --- Find available port ---
-find_available_port() {
-  print_step 2 7 "$(msg checking_port)"
+# --- Check if a port is in use ---
+is_port_in_use() {
+  local p=$1
+  ss -tlnp 2>/dev/null | grep -q ":${p} " || \
+  netstat -tlnp 2>/dev/null | grep -q ":${p} "
+}
 
-  for port in $(seq 3002 3100); do
-    if ! ss -tlnp 2>/dev/null | grep -q ":${port} " && \
-       ! netstat -tlnp 2>/dev/null | grep -q ":${port} "; then
+# --- Find available port (user input or auto-detect) ---
+find_available_port() {
+  print_step 2 7 "$(msg enter_port)"
+
+  echo ""
+  read -p "$(echo -e "${CYAN}Port [Enter = auto]:${NC} ")" user_port
+
+  # User entered a specific port
+  if [[ -n "$user_port" ]]; then
+    # Validate numeric
+    if ! [[ "$user_port" =~ ^[0-9]+$ ]] || (( user_port < 1024 || user_port > 65535 )); then
+      print_err "$(msg port_invalid)"
+      exit 1
+    fi
+
+    # Check if in use
+    if is_port_in_use "$user_port"; then
+      print_err "$(msg port_busy "$user_port")"
+      exit 1
+    fi
+
+    SELECTED_PORT=$user_port
+    print_ok "$(msg port_selected "$user_port")"
+    return
+  fi
+
+  # Auto-detect: scan from 3000
+  for port in $(seq 3000 3100); do
+    if ! is_port_in_use "$port"; then
       SELECTED_PORT=$port
       print_ok "$(msg port_selected "$port")"
       return
