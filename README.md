@@ -20,7 +20,7 @@ A modern free hosting management panel built with React + Node.js. Integrates wi
 - 🎫 Support ticket system
 - 📚 Knowledge base
 - 🔐 Two-factor authentication (TOTP)
-- 🌍 Multilingual (English, Tiếng Việt, 中文, Filipino)
+- 🌍 Multilingual (English, Tiếng Việt, 中文, Filipino)         
 
 **For Admins**
 - 👥 User & hosting management
