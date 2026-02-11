@@ -1,11 +1,11 @@
 {
   "name": "znode",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "NODE_OPTIONS=--max-old-space-size=1536 vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",

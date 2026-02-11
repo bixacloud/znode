@@ -64,6 +64,11 @@ MSG_EN=(
   [build_fail]="Build failed. Check logs above."
   [skip_download]="Source code already exists. Skip download? (y/n)"
   [creating_env]="Creating minimal .env for startup..."
+  [checking_swap]="Checking available memory..."
+  [creating_swap]="Low RAM detected (%sMB). Creating 2GB swap file for build..."
+  [swap_created]="Swap file created (2GB)."
+  [swap_exists]="Swap already active (%sMB), skipping."
+  [swap_skip]="Sufficient RAM (%sMB), no swap needed."
 )
 
 MSG_VI=(
@@ -111,6 +116,11 @@ MSG_VI=(
   [build_fail]="Build thất bại. Kiểm tra log phía trên."
   [skip_download]="Mã nguồn đã tồn tại. Bỏ qua tải xuống? (y/n)"
   [creating_env]="Đang tạo .env tối thiểu để khởi động..."
+  [checking_swap]="Đang kiểm tra bộ nhớ..."
+  [creating_swap]="RAM thấp (%sMB). Đang tạo swap 2GB để build..."
+  [swap_created]="Đã tạo swap file (2GB)."
+  [swap_exists]="Swap đã có (%sMB), bỏ qua."
+  [swap_skip]="RAM đủ (%sMB), không cần swap."
 )
 
 MSG_ZH=(
@@ -158,6 +168,11 @@ MSG_ZH=(
   [build_fail]="构建失败。请检查上方日志。"
   [skip_download]="源代码已存在。跳过下载？(y/n)"
   [creating_env]="正在创建最小 .env 启动配置..."
+  [checking_swap]="正在检查可用内存..."
+  [creating_swap]="检测到低内存（%sMB）。正在创建 2GB swap 文件..."
+  [swap_created]="Swap 文件已创建（2GB）。"
+  [swap_exists]="Swap 已激活（%sMB），跳过。"
+  [swap_skip]="内存充足（%sMB），无需 swap。"
 )
 
 MSG_FIL=(
@@ -205,6 +220,11 @@ MSG_FIL=(
   [build_fail]="Nabigo ang build. Suriin ang logs sa itaas."
   [skip_download]="Umiiral na ang source code. Laktawan ang download? (y/n)"
   [creating_env]="Gumagawa ng minimal .env para sa startup..."
+  [checking_swap]="Tinitingnan ang available na memory..."
+  [creating_swap]="Mababang RAM (%sMB). Gumagawa ng 2GB swap file para sa build..."
+  [swap_created]="Swap file nagawa na (2GB)."
+  [swap_exists]="May swap na (%sMB), nilaktawan."
+  [swap_skip]="Sapat ang RAM (%sMB), hindi kailangan ng swap."
 )
 
 LANG_CODE="en"
@@ -428,10 +448,53 @@ download_release() {
   print_ok "Download & extract complete."
 }
 
+# --- Ensure swap for low-RAM systems ---
+ensure_swap() {
+  echo -e "${BLUE}$(msg checking_swap)${NC}"
+
+  local total_ram_mb
+  total_ram_mb=$(free -m | awk '/^Mem:/{print $2}')
+  local swap_mb
+  swap_mb=$(free -m | awk '/^Swap:/{print $2}')
+
+  if (( swap_mb >= 512 )); then
+    print_ok "$(msg swap_exists "$swap_mb")"
+    return
+  fi
+
+  if (( total_ram_mb >= 3072 )); then
+    print_ok "$(msg swap_skip "$total_ram_mb")"
+    return
+  fi
+
+  print_warn "$(msg creating_swap "$total_ram_mb")"
+
+  if [[ -f /swapfile ]]; then
+    sudo swapoff /swapfile 2>/dev/null || true
+    sudo rm -f /swapfile
+  fi
+
+  sudo dd if=/dev/zero of=/swapfile bs=1M count=2048 status=progress 2>/dev/null || \
+    sudo fallocate -l 2G /swapfile
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile >/dev/null
+  sudo swapon /swapfile
+
+  # Add to fstab if not already there
+  if ! grep -q '/swapfile' /etc/fstab 2>/dev/null; then
+    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+  fi
+
+  print_ok "$(msg swap_created)"
+}
+
 # --- Install frontend ---
 install_frontend() {
   print_step 4 7 "$(msg installing_fe)"
   cd "$INSTALL_DIR"
+
+  # Ensure swap for low-RAM VPS
+  ensure_swap
 
   if ! npm install --production=false 2>&1; then
     print_err "$(msg npm_install_fail)"
@@ -442,7 +505,7 @@ install_frontend() {
   echo ""
   echo -e "${BLUE}$(msg building_fe)${NC}"
 
-  if ! VITE_API_URL="https://${DOMAIN}" npx vite build 2>&1; then
+  if ! NODE_OPTIONS="--max-old-space-size=1536" VITE_API_URL="https://${DOMAIN}" npx vite build 2>&1; then
     print_err "$(msg build_fail)"
     exit 1
   fi
@@ -482,7 +545,7 @@ ENVEOF
   # Build TypeScript
   echo ""
   echo -e "${BLUE}$(msg building_be)${NC}"
-  if ! npx tsc 2>&1; then
+  if ! NODE_OPTIONS="--max-old-space-size=1024" npx tsc 2>&1; then
     print_err "$(msg build_fail)"
     exit 1
   fi
