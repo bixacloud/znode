@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSite } from '@/contexts/SiteContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 
@@ -34,6 +35,7 @@ export default function Install() {
   const { t, language, setLanguage, availableLanguages } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { refetch: refetchSiteSettings } = useSite();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
@@ -190,6 +192,9 @@ export default function Install() {
       setInstallStep(t.install?.completed || 'Installation completed!');
       await new Promise(r => setTimeout(r, 500));
 
+      // Refresh site settings so siteName/logo update immediately
+      refetchSiteSettings();
+
       setStep('complete');
     } catch (error: any) {
       toast({
@@ -287,6 +292,9 @@ export default function Install() {
         retries++;
         await new Promise(r => setTimeout(r, 2000));
       }
+
+      // Refresh site settings so siteName/logo update immediately
+      refetchSiteSettings();
 
       setStep('complete');
     } catch (error: any) {

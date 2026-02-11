@@ -1,7 +1,8 @@
 // ============================================
-// ZNODE VERSION 
+// ZNODE VERSION (injected from package.json at build time)
 // ============================================
-export const APP_VERSION = "1.0.0";
+declare const __APP_VERSION__: string;
+export const APP_VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.0.0';
 
 // Application info
 export const APP_NAME = "znode";

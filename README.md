@@ -20,7 +20,7 @@ A modern free hosting management panel built with React + Node.js. Integrates wi
 - 🎫 Support ticket system
 - 📚 Knowledge base
 - 🔐 Two-factor authentication (TOTP)
-- 🌍 Multilingual (English, Tiếng Việt, 中文, Filipino)         
+- 🌍 Multilingual (English, Tiếng Việt, 中文, Filipino)
 
 **For Admins**
 - 👥 User & hosting management
@@ -163,5 +163,8 @@ The setup wizard creates `.env` automatically. Key variables:
 | `FRONTEND_URL` | Your domain URL |
 | `API_URL` | API base URL (same as frontend) |
 
+
+
 ## License
+
 GPL V3

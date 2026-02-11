@@ -309,10 +309,9 @@ export function generateKeyPair(): { privateKey: string; publicKey: string } {
 }
 
 // Generate CSR (Certificate Signing Request)
-export function generateCSR(domain: string, privateKey: string): string {
-  // Note: In production, use a proper library like node-forge
-  // This is a simplified implementation
-  const forge = require('node-forge');
+export async function generateCSR(domain: string, privateKey: string): Promise<string> {
+  // Dynamic import for ESM compatibility
+  const forge = await import('node-forge');
   
   const keys = forge.pki.privateKeyFromPem(privateKey);
   const csr = forge.pki.createCertificationRequest();

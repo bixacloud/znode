@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.0.2] - 2026-02-11
+
+### 🔧 Improvements
+
+- **Backend Build: esbuild Migration**: Replaced `tsc` with esbuild-based build script (`scripts/build.mjs`), reducing build time from 30s+ to ~40ms and memory usage from 1GB+ to ~50MB — enabling builds on 2GB RAM VPS without OOM errors.
+- **Install Script: User Port Input**: Users can now specify a custom backend port during installation (e.g. port already configured in CloudPanel). Pressing Enter auto-detects from port 3000+.
+- **Install Script: Swap Auto-Setup**: Automatically creates a 2GB swap file on low-RAM systems (<3GB) to prevent out-of-memory errors during build.
+- **Install Script: ZIP Format**: Changed release download format from `.tar.gz` to `.zip` for broader compatibility.
+- **Site Name Fix After Install**: The site name entered during the install wizard now takes effect immediately — previously it stayed as "ZNode" until admin re-saved settings.
+- **Dynamic Version in Footer**: Footer version is now automatically read from `package.json` at build time instead of being hardcoded in `constants.ts`.
+- **Frontend Chunk Splitting**: Vite build now splits vendor bundles (React, UI, Editor, Query, Charts, GrapesJS) into separate chunks to reduce peak memory usage during build.
+
+### 🐛 Bug Fixes
+
+- Fixed backend `tsc` build crashing with "JavaScript heap out of memory" on 2GB RAM VPS.
+- Fixed `require('node-forge')` ESM warning in `ssl.ts` — converted to dynamic `import()`.
+- Fixed site name/logo not updating after install wizard completion (SiteContext was not refetched).
+- Fixed install script hardcoded port 3002 — now supports user-specified port.
+
+### 🌐 Internationalization
+
+- Added port input prompt translations in all 4 languages (EN, VI, ZH, FIL): `enter_port`, `port_invalid`, `port_busy`.
+- Added swap-related translations in all 4 languages: `checking_swap`, `creating_swap`, `swap_created`, `swap_exists`, `swap_skip`.
+
+---
+
 ## [1.0.1] - 2026-02-10
 
 ### ✨ New Features
