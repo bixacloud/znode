@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface MOFHConfig {
   enabled: boolean;
@@ -44,6 +45,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 const MOFHSettings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
+  const mt = t.admin?.mofh || {} as any;
   const [showPassword, setShowPassword] = useState(false);
   const [serverIp, setServerIp] = useState<string>("");
   const [loadingIp, setLoadingIp] = useState(true);
@@ -88,11 +91,11 @@ const MOFHSettings = () => {
           const data = await response.json();
           setServerIp(data.ip);
         } else {
-          setServerIp('Không thể lấy IP');
+          setServerIp(mt.cannotGetIp || 'Cannot get IP');
         }
       } catch (error) {
         console.error('Failed to fetch server IP:', error);
-        setServerIp('Không thể lấy IP');
+        setServerIp(mt.cannotGetIp || 'Cannot get IP');
       } finally {
         setLoadingIp(false);
       }
@@ -130,13 +133,13 @@ const MOFHSettings = () => {
       queryClient.invalidateQueries({ queryKey: ["mofh-settings"] });
       queryClient.invalidateQueries({ queryKey: ["mofh-packages"] });
       toast({
-        title: "Saved successfully",
-        description: "MOFH API settings have been updated",
+        title: mt.savedSuccess || "Saved successfully",
+        description: mt.savedDesc || "MOFH API settings have been updated",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: mt.serverError || "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -171,21 +174,21 @@ const MOFHSettings = () => {
     onSuccess: (data) => {
       if (data.success) {
         toast({
-          title: "Connection successful",
-          description: data.message || "MOFH API connected successfully",
+          title: mt.connectionSuccess || "Connection successful",
+          description: data.message || mt.connectionSuccessDesc || "MOFH API connected successfully",
         });
       } else {
         toast({
-          title: "Connection failed",
-          description: data.message || "Cannot connect to MOFH API",
+          title: mt.connectionFailed || "Connection failed",
+          description: data.message || mt.connectionFailedDesc || "Cannot connect to MOFH API",
           variant: "destructive",
         });
       }
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Cannot connect to server",
+        title: mt.serverError || "Error",
+        description: mt.serverErrorDesc || "Cannot connect to server",
         variant: "destructive",
       });
     },
@@ -211,30 +214,29 @@ const MOFHSettings = () => {
     <AdminLayout>
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Hosting API (MOFH)</h1>
+        <h1 className="text-2xl font-bold">{mt.title || 'Hosting API (MOFH)'}</h1>
         <p className="text-muted-foreground">
-          Cấu hình MyOwnFreeHost API để quản lý hosting miễn phí
+          {mt.subtitle || 'Configure MyOwnFreeHost API to manage free hosting'}
         </p>
       </div>
 
       {/* Info Alert */}
       <Alert>
         <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Lưu ý quan trọng</AlertTitle>
+        <AlertTitle>{mt.importantNote || 'Important Note'}</AlertTitle>
         <AlertDescription className="space-y-2">
           <p>
-            MOFH API cho phép bạn tạo và quản lý tài khoản hosting miễn phí.
-            Mỗi người dùng chỉ được phép tạo tối đa 3 tài khoản.
+            {mt.noteDesc1 || 'MOFH API allows you to create and manage free hosting accounts. Each user is limited to 3 accounts.'}
           </p>
           <p>
-            Để lấy API credentials, truy cập:{" "}
+            {mt.noteDesc2 || 'To get API credentials, visit:'}{" "}
             <a
               href="https://panel.myownfreehost.net/panel/index2.php?option=api"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline inline-flex items-center gap-1"
             >
-              MOFH Panel → API Settings
+              {mt.panelApiSettings || 'MOFH Panel → API Settings'}
               <ExternalLink className="w-3 h-3" />
             </a>
           </p>
@@ -252,14 +254,14 @@ const MOFHSettings = () => {
                   <Server className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <CardTitle>API Credentials</CardTitle>
+                  <CardTitle>{mt.apiCredentials || 'API Credentials'}</CardTitle>
                   <CardDescription>
-                    Thông tin đăng nhập MOFH API
+                    {mt.apiCredentialsDesc || 'MOFH API login information'}
                   </CardDescription>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Label htmlFor="mofh-enabled">Kích hoạt</Label>
+                <Label htmlFor="mofh-enabled">{mt.enabled || 'Enabled'}</Label>
                 <Switch
                   id="mofh-enabled"
                   checked={config.enabled}
@@ -273,10 +275,10 @@ const MOFHSettings = () => {
           <CardContent className="space-y-4">
             {/* API Username */}
             <div className="space-y-2">
-              <Label htmlFor="api-username">API Username</Label>
+              <Label htmlFor="api-username">{mt.apiUsername || 'API Username'}</Label>
               <Input
                 id="api-username"
-                placeholder="Nhập API Username từ MOFH Panel"
+                placeholder={mt.apiUsernamePlaceholder || 'Enter API Username from MOFH Panel'}
                 value={config.apiUsername}
                 onChange={(e) =>
                   setConfig({ ...config, apiUsername: e.target.value })
@@ -286,12 +288,12 @@ const MOFHSettings = () => {
 
             {/* API Password */}
             <div className="space-y-2">
-              <Label htmlFor="api-password">API Password</Label>
+              <Label htmlFor="api-password">{mt.apiPassword || 'API Password'}</Label>
               <div className="relative">
                 <Input
                   id="api-password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Nhập API Password từ MOFH Panel"
+                  placeholder={mt.apiPasswordPlaceholder || 'Enter API Password from MOFH Panel'}
                   value={config.apiPassword}
                   onChange={(e) =>
                     setConfig({ ...config, apiPassword: e.target.value })
@@ -314,17 +316,17 @@ const MOFHSettings = () => {
 
             {/* Default Package */}
             <div className="space-y-2">
-              <Label htmlFor="default-package">Gói mặc định</Label>
+              <Label htmlFor="default-package">{mt.defaultPackage || 'Default Package'}</Label>
               <Input
                 id="default-package"
-                placeholder="Nhập tên gói (ví dụ: Default)"
+                placeholder={mt.defaultPackagePlaceholder || 'Enter package name (e.g. Default)'}
                 value={config.defaultPackage}
                 onChange={(e) =>
                   setConfig({ ...config, defaultPackage: e.target.value })
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Tên gói hosting từ MOFH Panel
+                {mt.defaultPackageHint || 'Hosting package name from MOFH Panel'}
               </p>
             </div>
 
@@ -332,18 +334,18 @@ const MOFHSettings = () => {
             <div className="space-y-2">
               <Label htmlFor="cpanel-url" className="flex items-center gap-2">
                 <Globe className="w-4 h-4" />
-                cPanel URL
+                {mt.cpanelUrl || 'cPanel URL'}
               </Label>
               <Input
                 id="cpanel-url"
-                placeholder="cpanel.yourdomain.com"
+                placeholder={mt.cpanelUrlPlaceholder || 'cpanel.yourdomain.com'}
                 value={config.cpanelUrl}
                 onChange={(e) =>
                   setConfig({ ...config, cpanelUrl: e.target.value })
                 }
               />
               <p className="text-xs text-muted-foreground">
-                URL cPanel hiển thị cho người dùng
+                {mt.cpanelUrlHint || 'cPanel URL displayed to users'}
               </p>
             </div>
 
@@ -351,18 +353,18 @@ const MOFHSettings = () => {
             <div className="space-y-2">
               <Label htmlFor="custom-nameservers" className="flex items-center gap-2">
                 <Network className="w-4 h-4" />
-                Custom Nameservers
+                {mt.customNameservers || 'Custom Nameservers'}
               </Label>
               <Input
                 id="custom-nameservers"
-                placeholder="ns1.example.com, ns2.example.com"
+                placeholder={mt.customNameserversPlaceholder || 'ns1.example.com, ns2.example.com'}
                 value={config.customNameservers || ""}
                 onChange={(e) =>
                   setConfig({ ...config, customNameservers: e.target.value })
                 }
               />
               <p className="text-xs text-muted-foreground">
-                Nameservers cho custom domain (phân cách bằng dấu phẩy). Để trống sẽ dùng ns1-ns5.byet.org
+                {mt.customNameserversHint || 'Nameservers for custom domains (comma-separated). Leave empty to use ns1-ns5.byet.org'}
               </p>
             </div>
 
@@ -392,7 +394,7 @@ const MOFHSettings = () => {
                 ) : (
                   <Save className="w-4 h-4 mr-2" />
                 )}
-                Lưu cài đặt
+                {mt.saveSettings || 'Save Settings'}
               </Button>
             </div>
           </CardContent>
@@ -405,13 +407,13 @@ const MOFHSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Network className="w-5 h-5" />
-                Thông tin Server
+                {mt.serverInfo || 'Server Information'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Callback URL */}
               <div className="space-y-2">
-                <Label htmlFor="callback-url">Callback URL</Label>
+                <Label htmlFor="callback-url">{mt.callbackUrl || 'Callback URL'}</Label>
                 <div className="flex gap-2">
                   <Input
                     id="callback-url"
@@ -426,8 +428,8 @@ const MOFHSettings = () => {
                     onClick={() => {
                       navigator.clipboard.writeText(`${window.location.origin}/api/mofh/callback`);
                       toast({
-                        title: "Đã sao chép",
-                        description: "Callback URL đã được sao chép",
+                        title: mt.copied || "Copied",
+                        description: mt.callbackCopied || "Callback URL has been copied",
                       });
                     }}
                   >
@@ -435,13 +437,13 @@ const MOFHSettings = () => {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Dán vào MOFH Panel → API Settings
+                  {mt.callbackUrlHint || 'Paste into MOFH Panel → API Settings'}
                 </p>
               </div>
 
               {/* Server Public IP */}
               <div className="space-y-2">
-                <Label htmlFor="server-ip">Server IP</Label>
+                <Label htmlFor="server-ip">{mt.serverIp || 'Server IP'}</Label>
                 <div className="flex gap-2">
                   <Input
                     id="server-ip"
@@ -457,8 +459,8 @@ const MOFHSettings = () => {
                     onClick={() => {
                       navigator.clipboard.writeText(serverIp);
                       toast({
-                        title: "Đã sao chép",
-                        description: "Server IP đã được sao chép",
+                        title: mt.copied || "Copied",
+                        description: mt.ipCopied || "Server IP has been copied",
                       });
                     }}
                   >
@@ -466,7 +468,7 @@ const MOFHSettings = () => {
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Thêm IP này vào whitelist MOFH
+                  {mt.serverIpHint || 'Add this IP to MOFH whitelist'}
                 </p>
               </div>
             </CardContent>

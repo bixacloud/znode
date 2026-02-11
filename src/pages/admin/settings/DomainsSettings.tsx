@@ -54,6 +54,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AllowedDomain {
   id: string;
@@ -69,6 +70,9 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 const DomainsSettings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t, language } = useLanguage();
+  const dt = t.admin?.domains || {} as any;
+  const dateLocale = { en: 'en-US', vi: 'vi-VN', zh: 'zh-CN', fil: 'fil-PH' }[language] || 'en-US';
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingDomain, setEditingDomain] = useState<AllowedDomain | null>(null);
@@ -119,12 +123,12 @@ const DomainsSettings = () => {
       setNewDomain({ domain: "", description: "", enabled: true });
       toast({
         title: "Success",
-        description: "Domain added successfully",
+        description: dt.addSuccess || "Domain added successfully",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: dt.error || "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -155,12 +159,12 @@ const DomainsSettings = () => {
       setEditingDomain(null);
       toast({
         title: "Success",
-        description: "Domain updated successfully",
+        description: dt.updateSuccess || "Domain updated successfully",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: dt.error || "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -187,12 +191,12 @@ const DomainsSettings = () => {
       queryClient.invalidateQueries({ queryKey: ["allowed-domains"] });
       toast({
         title: "Success",
-        description: "Domain deleted successfully",
+        description: dt.deleteSuccess || "Domain deleted successfully",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
+        title: dt.error || "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -222,8 +226,8 @@ const DomainsSettings = () => {
   const handleAddDomain = () => {
     if (!newDomain.domain.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter domain name",
+        title: dt.error || "Error",
+        description: dt.enterDomain || "Please enter domain name",
         variant: "destructive",
       });
       return;
@@ -256,43 +260,43 @@ const DomainsSettings = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Quản lý Domain</h1>
+            <h1 className="text-2xl font-bold text-foreground">{dt.title || 'Domain Management'}</h1>
             <p className="text-muted-foreground mt-1">
-              Quản lý danh sách domain cho phép người dùng tạo subdomain
+              {dt.subtitle || 'Manage the list of domains that allow users to create subdomains'}
             </p>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
-                Thêm Domain
+                {dt.addDomain || 'Add Domain'}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Thêm Domain mới</DialogTitle>
+                <DialogTitle>{dt.addDomainTitle || 'Add New Domain'}</DialogTitle>
                 <DialogDescription>
-                  Thêm domain mới vào danh sách cho phép. Người dùng có thể tạo subdomain trên các domain này.
+                  {dt.addDomainDesc || 'Add a new domain to the allowed list. Users can create subdomains on these domains.'}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="domain">Tên Domain</Label>
+                  <Label htmlFor="domain">{dt.domainName || 'Domain Name'}</Label>
                   <Input
                     id="domain"
-                    placeholder="example.com"
+                    placeholder={dt.domainPlaceholder || 'example.com'}
                     value={newDomain.domain}
                     onChange={(e) => setNewDomain({ ...newDomain, domain: e.target.value })}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Ví dụ: freehost.vn, myhost.net (không cần www)
+                    {dt.domainHint || 'Example: freehost.vn, myhost.net (no www)'}
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Mô tả (tùy chọn)</Label>
+                  <Label htmlFor="description">{dt.description || 'Description (optional)'}</Label>
                   <Input
                     id="description"
-                    placeholder="Mô tả cho domain này"
+                    placeholder={dt.descriptionPlaceholder || 'Description for this domain'}
                     value={newDomain.description}
                     onChange={(e) => setNewDomain({ ...newDomain, description: e.target.value })}
                   />
@@ -303,23 +307,23 @@ const DomainsSettings = () => {
                     checked={newDomain.enabled}
                     onCheckedChange={(checked) => setNewDomain({ ...newDomain, enabled: checked })}
                   />
-                  <Label htmlFor="enabled">Kích hoạt</Label>
+                  <Label htmlFor="enabled">{dt.enabled || 'Enabled'}</Label>
                 </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Hủy
+                  {dt.cancel || 'Cancel'}
                 </Button>
                 <Button onClick={handleAddDomain} disabled={addMutation.isPending}>
                   {addMutation.isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Đang thêm...
+                      {dt.adding || 'Adding...'}
                     </>
                   ) : (
                     <>
                       <Plus className="w-4 h-4 mr-2" />
-                      Thêm
+                      {dt.add || 'Add'}
                     </>
                   )}
                 </Button>
@@ -331,10 +335,9 @@ const DomainsSettings = () => {
         {/* Info Alert */}
         <Alert>
           <Globe className="h-4 w-4" />
-          <AlertTitle>Hướng dẫn</AlertTitle>
+          <AlertTitle>{dt.guide || 'Guide'}</AlertTitle>
           <AlertDescription>
-            Thêm các domain mà bạn muốn cho phép người dùng tạo subdomain. Ví dụ: nếu thêm "freehost.vn", 
-            người dùng có thể tạo hosting với subdomain như "username.freehost.vn".
+            {dt.guideDesc || 'Add domains that you want to allow users to create subdomains. For example: if you add "freehost.vn", users can create hosting with subdomains like "username.freehost.vn".'}
           </AlertDescription>
         </Alert>
 
@@ -343,10 +346,10 @@ const DomainsSettings = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="w-5 h-5" />
-              Danh sách Domain
+              {dt.domainList || 'Domain List'}
             </CardTitle>
             <CardDescription>
-              {domains.length} domain đã cấu hình
+              {(dt.domainCount || '{count} domains configured').replace('{count}', String(domains.length))}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -359,24 +362,24 @@ const DomainsSettings = () => {
                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                   <Globe className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-medium text-foreground mb-2">Chưa có domain nào</h3>
+                <h3 className="text-lg font-medium text-foreground mb-2">{dt.noDomains || 'No domains yet'}</h3>
                 <p className="text-muted-foreground max-w-sm mb-4">
-                  Thêm domain đầu tiên để người dùng có thể tạo subdomain.
+                  {dt.noDomainsDesc || 'Add the first domain to allow users to create subdomains.'}
                 </p>
                 <Button onClick={() => setIsAddDialogOpen(true)}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Thêm Domain
+                  {dt.addDomain || 'Add Domain'}
                 </Button>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Domain</TableHead>
-                    <TableHead>Mô tả</TableHead>
-                    <TableHead>Trạng thái</TableHead>
-                    <TableHead>Ngày tạo</TableHead>
-                    <TableHead className="text-right">Thao tác</TableHead>
+                    <TableHead>{dt.domain || 'Domain'}</TableHead>
+                    <TableHead>{dt.description || 'Description'}</TableHead>
+                    <TableHead>{dt.status || 'Status'}</TableHead>
+                    <TableHead>{dt.createdAt || 'Created'}</TableHead>
+                    <TableHead className="text-right">{dt.actions || 'Actions'}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -402,19 +405,19 @@ const DomainsSettings = () => {
                             {domain.enabled ? (
                               <>
                                 <CheckCircle className="w-3 h-3 mr-1" />
-                                Hoạt động
+                                {dt.active || 'Active'}
                               </>
                             ) : (
                               <>
                                 <XCircle className="w-3 h-3 mr-1" />
-                                Tắt
+                                {dt.inactive || 'Disabled'}
                               </>
                             )}
                           </Badge>
                         </div>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {new Date(domain.createdAt).toLocaleDateString("vi-VN")}
+                        {new Date(domain.createdAt).toLocaleDateString(dateLocale)}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -433,14 +436,13 @@ const DomainsSettings = () => {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+                                <AlertDialogTitle>{dt.confirmDelete || 'Confirm Delete'}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Bạn có chắc muốn xóa domain <strong>{domain.domain}</strong>? 
-                                  Hành động này không thể hoàn tác.
+                                  {(dt.confirmDeleteDesc || 'Are you sure you want to delete domain "{domain}"? This action cannot be undone.').replace('{domain}', domain.domain)}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                <AlertDialogCancel>{dt.cancel || 'Cancel'}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => deleteMutation.mutate(domain.id)}
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -448,10 +450,10 @@ const DomainsSettings = () => {
                                   {deleteMutation.isPending ? (
                                     <>
                                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                      Đang xóa...
+                                      {dt.deleting || 'Deleting...'}
                                     </>
                                   ) : (
-                                    "Xóa"
+                                    dt.delete || 'Delete'
                                   )}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
@@ -471,15 +473,15 @@ const DomainsSettings = () => {
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Chỉnh sửa Domain</DialogTitle>
+              <DialogTitle>{dt.editDomain || 'Edit Domain'}</DialogTitle>
               <DialogDescription>
-                Cập nhật thông tin domain
+                {dt.editDomainDesc || 'Update domain information'}
               </DialogDescription>
             </DialogHeader>
             {editingDomain && (
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-domain">Tên Domain</Label>
+                  <Label htmlFor="edit-domain">{dt.domainName || 'Domain Name'}</Label>
                   <Input
                     id="edit-domain"
                     value={editingDomain.domain}
@@ -487,7 +489,7 @@ const DomainsSettings = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-description">Mô tả</Label>
+                  <Label htmlFor="edit-description">{dt.description || 'Description'}</Label>
                   <Input
                     id="edit-description"
                     value={editingDomain.description}
@@ -500,24 +502,24 @@ const DomainsSettings = () => {
                     checked={editingDomain.enabled}
                     onCheckedChange={(checked) => setEditingDomain({ ...editingDomain, enabled: checked })}
                   />
-                  <Label htmlFor="edit-enabled">Kích hoạt</Label>
+                  <Label htmlFor="edit-enabled">{dt.enabled || 'Enabled'}</Label>
                 </div>
               </div>
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                Hủy
+                {dt.cancel || 'Cancel'}
               </Button>
               <Button onClick={handleEditDomain} disabled={updateMutation.isPending}>
                 {updateMutation.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Đang lưu...
+                    {dt.saving || 'Saving...'}
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />
-                    Lưu
+                    {dt.save || 'Save'}
                   </>
                 )}
               </Button>

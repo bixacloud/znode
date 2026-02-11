@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/admin/AdminLayout";
 import authService, { OAuthConfig, type OAuthSettings as OAuthSettingsType } from "@/services/auth";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // OAuth Provider Icons
 const GoogleIcon = () => (
@@ -51,14 +52,14 @@ const DiscordIcon = () => (
   </svg>
 );
 
-const providers = [
+const providersConfig = [
   { 
     id: 'google', 
     name: 'Google', 
     icon: GoogleIcon, 
     color: 'bg-white border',
     docsUrl: 'https://console.cloud.google.com/apis/credentials',
-    description: 'Đăng nhập bằng tài khoản Google'
+    descKey: 'providerDescGoogle'
   },
   { 
     id: 'facebook', 
@@ -66,7 +67,7 @@ const providers = [
     icon: FacebookIcon, 
     color: 'bg-white border',
     docsUrl: 'https://developers.facebook.com/apps',
-    description: 'Đăng nhập bằng tài khoản Facebook'
+    descKey: 'providerDescFacebook'
   },
   { 
     id: 'microsoft', 
@@ -74,7 +75,7 @@ const providers = [
     icon: MicrosoftIcon, 
     color: 'bg-white border',
     docsUrl: 'https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps',
-    description: 'Đăng nhập bằng tài khoản Microsoft'
+    descKey: 'providerDescMicrosoft'
   },
   { 
     id: 'discord', 
@@ -82,7 +83,7 @@ const providers = [
     icon: DiscordIcon, 
     color: 'bg-white border',
     docsUrl: 'https://discord.com/developers/applications',
-    description: 'Đăng nhập bằng tài khoản Discord'
+    descKey: 'providerDescDiscord'
   },
 ];
 
@@ -99,6 +100,13 @@ const OAuthSettingsPage = () => {
   const [activeTab, setActiveTab] = useState('google');
   
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const ot = t.admin?.oauth || {} as any;
+
+  const providers = providersConfig.map(p => ({
+    ...p,
+    description: (ot as any)[p.descKey] || `Sign in with ${p.name} account`,
+  }));
 
   const defaultSettings: OAuthSettingsType = {
     google: { enabled: false, clientId: '', clientSecret: '' },
@@ -121,8 +129,8 @@ const OAuthSettingsPage = () => {
       });
     } catch {
       toast({
-        title: "Error",
-        description: "Cannot load OAuth configuration",
+        title: ot.error || "Error",
+        description: ot.cannotLoad || "Cannot load OAuth configuration",
         variant: "destructive",
       });
     } finally {
@@ -141,12 +149,12 @@ const OAuthSettingsPage = () => {
       await authService.updateOAuthProvider(provider, settings[provider]);
       toast({
         title: "Success",
-        description: `${provider.charAt(0).toUpperCase() + provider.slice(1)} configuration saved`,
+        description: (ot.configSaved || '{provider} configuration saved').replace('{provider}', provider.charAt(0).toUpperCase() + provider.slice(1)),
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Cannot save configuration",
+        title: ot.error || "Error",
+        description: ot.cannotSave || "Cannot save configuration",
         variant: "destructive",
       });
     } finally {
@@ -165,8 +173,8 @@ const OAuthSettingsPage = () => {
     } catch (error: unknown) {
       const err = error as { error?: string };
       toast({
-        title: "Error",
-        description: err.error || "Cannot test configuration",
+        title: ot.error || "Error",
+        description: err.error || ot.cannotTest || "Cannot test configuration",
         variant: "destructive",
       });
     }
@@ -204,8 +212,8 @@ const OAuthSettingsPage = () => {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-foreground">OAuth Providers</h1>
-          <p className="text-muted-foreground mt-1">Cấu hình đăng nhập bằng mạng xã hội</p>
+          <h1 className="text-2xl font-bold text-foreground">{ot.title || 'OAuth Providers'}</h1>
+          <p className="text-muted-foreground mt-1">{ot.subtitle || 'Configure social login providers'}</p>
         </div>
         
         {/* OAuth Configuration */}
@@ -213,10 +221,10 @@ const OAuthSettingsPage = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5" />
-              Cấu hình OAuth Providers
+              {ot.configTitle || 'OAuth Providers Configuration'}
             </CardTitle>
             <CardDescription>
-              Thiết lập các provider OAuth để cho phép người dùng đăng nhập bằng tài khoản mạng xã hội
+              {ot.configDesc || 'Set up OAuth providers to allow users to sign in with social accounts'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -261,12 +269,12 @@ const OAuthSettingsPage = () => {
                         className="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline mt-2"
                       >
                         <ExternalLink className="w-3 h-3" />
-                        Mở Developer Console
+                        {ot.openConsole || 'Open Developer Console'}
                       </a>
                     </div>
                     <div className="flex items-center gap-2">
                       <Label htmlFor={`${provider.id}-enabled`} className="text-sm">
-                        {config.enabled ? 'Đang bật' : 'Đang tắt'}
+                        {config.enabled ? (ot.enabled || 'Enabled') : (ot.disabled || 'Disabled')}
                       </Label>
                       <Switch
                         id={`${provider.id}-enabled`}
@@ -286,7 +294,7 @@ const OAuthSettingsPage = () => {
                         id={`${provider.id}-clientId`}
                         value={config.clientId}
                         onChange={(e) => updateProviderConfig(provider.id as keyof OAuthSettingsType, 'clientId', e.target.value)}
-                        placeholder={`Nhập ${provider.name} Client ID`}
+                        placeholder={(ot.clientIdPlaceholder || 'Enter {provider} Client ID').replace('{provider}', provider.name)}
                         className="font-mono"
                       />
                     </div>
@@ -301,7 +309,7 @@ const OAuthSettingsPage = () => {
                           type={showSecrets[provider.id] ? "text" : "password"}
                           value={config.clientSecret}
                           onChange={(e) => updateProviderConfig(provider.id as keyof OAuthSettingsType, 'clientSecret', e.target.value)}
-                          placeholder={`Nhập ${provider.name} Client Secret`}
+                          placeholder={(ot.clientSecretPlaceholder || 'Enter {provider} Client Secret').replace('{provider}', provider.name)}
                           className="font-mono pr-10"
                         />
                         <button
@@ -316,8 +324,8 @@ const OAuthSettingsPage = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor={`${provider.id}-callbackUrl`}>
-                        Callback URL
-                        <span className="text-muted-foreground font-normal ml-2">(Copy vào Developer Console)</span>
+                        {ot.callbackUrl || 'Callback URL'}
+                        <span className="text-muted-foreground font-normal ml-2">{ot.callbackUrlHint || '(Copy to Developer Console)'}</span>
                       </Label>
                       <div className="flex gap-2">
                         <Input
@@ -331,8 +339,8 @@ const OAuthSettingsPage = () => {
                           onClick={() => {
                             navigator.clipboard.writeText(`${window.location.origin.replace(/:\d+$/, ':3002')}/api/auth/${provider.id}/callback`);
                             toast({
-                              title: "Đã copy",
-                              description: "Callback URL đã được copy vào clipboard",
+                              title: ot.copied || "Copied",
+                              description: ot.copiedDesc || "Callback URL has been copied to clipboard",
                             });
                           }}
                         >
@@ -345,13 +353,13 @@ const OAuthSettingsPage = () => {
                     <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-sm">
                       <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                       <div className="text-blue-700 dark:text-blue-300">
-                        <p className="font-medium">Hướng dẫn:</p>
+                        <p className="font-medium">{ot.guide || 'Guide:'}</p>
                         <ol className="list-decimal list-inside mt-1 space-y-1 text-blue-600 dark:text-blue-400">
-                          <li>Truy cập Developer Console của {provider.name}</li>
-                          <li>Tạo ứng dụng mới hoặc chọn ứng dụng hiện có</li>
-                          <li>Copy Client ID và Client Secret</li>
-                          <li>Thêm Callback URL vào danh sách Redirect URIs</li>
-                          <li>Bật OAuth và nhấn Lưu</li>
+                          <li>{(ot.guideStep1 || 'Go to {provider} Developer Console').replace('{provider}', provider.name)}</li>
+                          <li>{ot.guideStep2 || 'Create a new app or select an existing one'}</li>
+                          <li>{ot.guideStep3 || 'Copy Client ID and Client Secret'}</li>
+                          <li>{ot.guideStep4 || 'Add Callback URL to Redirect URIs list'}</li>
+                          <li>{ot.guideStep5 || 'Enable OAuth and click Save'}</li>
                         </ol>
                       </div>
                     </div>
@@ -369,14 +377,14 @@ const OAuthSettingsPage = () => {
                       ) : (
                         <Save className="w-4 h-4 mr-2" />
                       )}
-                      Lưu cấu hình
+                      {ot.saveConfig || 'Save Configuration'}
                     </Button>
                     <Button
                       variant="outline"
                       onClick={() => handleTest(provider.id)}
                       disabled={!config.enabled || !config.clientId}
                     >
-                      Kiểm tra kết nối
+                      {ot.testConnection || 'Test Connection'}
                     </Button>
                   </div>
                 </TabsContent>
@@ -389,9 +397,9 @@ const OAuthSettingsPage = () => {
       {/* Status Overview */}
       <Card>
         <CardHeader>
-          <CardTitle>Trạng thái OAuth Providers</CardTitle>
+          <CardTitle>{ot.statusTitle || 'OAuth Providers Status'}</CardTitle>
           <CardDescription>
-            Tổng quan về các provider đã cấu hình
+            {ot.statusDesc || 'Overview of configured providers'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -419,12 +427,12 @@ const OAuthSettingsPage = () => {
                         {isConfigured ? (
                           <>
                             <Check className="w-3 h-3 text-green-600" />
-                            <span className="text-green-600">Đã cấu hình</span>
+                            <span className="text-green-600">{ot.configured || 'Configured'}</span>
                           </>
                         ) : (
                           <>
                             <X className="w-3 h-3 text-gray-400" />
-                            <span className="text-muted-foreground">Chưa cấu hình</span>
+                            <span className="text-muted-foreground">{ot.notConfigured || 'Not configured'}</span>
                           </>
                         )}
                       </div>
